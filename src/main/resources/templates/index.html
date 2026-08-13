@@ -5,64 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>臨床工学科 データベース</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #dee2e6;
-            margin: 0;
-            padding: 20px;
+        * {
+            box-sizing: border-box;
         }
 
-        /* 1. コンテナの最大幅を広げる（または画面いっぱいにする） */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ヘッダー */
+        .app-header {
+            background-color: #02104E;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+            .app-header h1 {
+                margin: 0;
+                font-size: 28px;
+            }
+
+        /* タブナビゲーションバー */
+        .tab-bar {
+            display: flex;
+            background-color: #1a252f;
+            overflow-x: auto;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .tab-item {
+            padding: 12px 20px;
+            color: #bdc3c7;
+            background: none;
+            border: none;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .tab-item:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: white;
+            }
+
+            /* 選択されている（アクティブな）タブ */
+            .tab-item.active {
+                background-color: #3498db;
+                color: white;
+            }
+
+        /* タブを閉じる小ボタン */
+        .tab-close-btn {
+            font-size: 12px;
+            border-radius: 50%;
+            padding: 2px 6px;
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            line-height: 1;
+        }
+
+            .tab-close-btn:hover {
+                background: #e74c3c;
+            }
+
+        /* メインコンテンツコンテナ */
         .container {
-            max-width: 98% !important; /* または 100% / 1400px などお好みのサイズに調整 */
+            max-width: 98% !important;
             width: 100%;
             margin: 0 auto;
             padding: 20px;
         }
 
-        /* 2. テーブル全体の幅を100%にして自動伸縮させる */
-        .table-container {
-            width: 100%;
-            overflow-x: auto; /* 万が一横幅が収まりきらない場合にスクロール可能にする */
-        }
-
-        table {
-            width: 100% !important;
-            border-collapse: collapse;
-        }
-
-        /* 3. 各列（カラム）の幅を適切に配分する（任意） */
-        th:nth-child(1), td:nth-child(1) {
-            width: 100px;
-        }
-        /* 日付 */
-        th:nth-child(2), td:nth-child(2) {
-            width: 90px;
-        }
-        /* 区分 */
-        th:nth-child(3), td:nth-child(3) {
-            width: 80px;
-        }
-        /* 重要度 */
-        th:nth-child(4), td:nth-child(4) {
-            width: 90px;
-        }
-        /* 記入者 */
-        th:nth-child(5), td:nth-child(5) {
-            width: auto;
-        }
-        /* 内容（残り幅をすべて活用） */
-        th:nth-child(6), td:nth-child(6) {
-            width: 420px;
-        }
-        /* 確認チェック（12名分） */
-        th:nth-child(7), td:nth-child(7) {
-            width: 70px;
-        }
-        /* 操作（削除ボタン） */
-
+        /* タブのページ切り替え */
         .page {
             display: none;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
             .page.active {
@@ -74,7 +105,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         .btn {
@@ -87,11 +118,10 @@
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 30px;
+            font-size: 26px;
             font-weight: bold;
             cursor: pointer;
             text-align: center;
-            box-sizing: border-box;
             transition: background-color 0.2s, transform 0.1s;
         }
 
@@ -105,8 +135,6 @@
 
         .btn-back {
             background-color: #7f8c8d;
-            margin-top: 0;
-            margin-bottom: 20px;
         }
 
         .sub-btn-group {
@@ -114,7 +142,7 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             margin-top: 25px;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
         }
 
         .btn-sub {
@@ -122,58 +150,21 @@
             align-items: center;
             justify-content: center;
             padding: 22px 10px;
-            background-color: white;
+            background-color: #e2e8f0;
             color: #2c3e50;
             border: 1px solid #bdc3c7;
             border-radius: 8px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            text-align: center;
-            box-sizing: border-box;
             transition: background-color 0.2s, transform 0.1s;
         }
 
             .btn-sub:hover {
-                background-color: #bdc3c7;
+                background-color: #cbd5e1;
             }
 
-            .btn-sub:active {
-                transform: scale(0.98);
-            }
-
-        @media (max-width: 768px) {
-            .main-btn-group {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .main-btn-group, .sub-btn-group {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-
+        /* テーブル設定 */
         .record-table {
             width: 100%;
             border-collapse: collapse;
@@ -199,69 +190,25 @@
                 background-color: #f8f9fa;
             }
 
-        .btn-delete {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
+        /* フォーム系 */
+        .form-group {
+            margin-bottom: 20px;
         }
 
-            .btn-delete:hover {
-                background-color: #c0392b;
-            }
-
-        .btn-edit {
-            background-color: #f39c12;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
+        label {
+            display: block;
+            margin-bottom: 8px;
             font-weight: bold;
-            margin-right: 5px;
+            font-size: 16px;
         }
 
-            .btn-edit:hover {
-                background-color: #d35400;
-            }
-
-        /* 12名用チェックボックスグリッドスタイル */
-        .staff-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 6px 8px;
-            background: #f8f9fa;
-            padding: 8px;
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
             border-radius: 6px;
-            border: 1px solid #e2e8f0;
         }
-
-        .staff-checkbox-item {
-            display: flex;
-            align-items: center;
-            font-size: 17px;
-            cursor: pointer;
-            white-space: nowrap;
-            user-select: none;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-            .staff-checkbox-item input {
-                width: auto;
-                margin-right: 4px;
-                cursor: pointer;
-            }
-
-            .staff-checkbox-item.checked {
-                color: #27ae60;
-                font-weight: bold;
-            }
 
         /* 重要度バッジ */
         .badge {
@@ -285,31 +232,52 @@
         .badge-low {
             background-color: #95a5a6;
         }
+
+        @media (max-width: 768px) {
+            .main-btn-group {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-btn-group, .sub-btn-group {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
 
+    <!-- ヘッダー -->
+    <header class="app-header">
+        <h1>臨床工学科データベース</h1>
+    </header>
+
+    <!-- アプリ内 タブバー（動的切替） -->
+    <nav class="tab-bar" id="tab-bar">
+        <button class="tab-item active" onclick="switchTab('main-page')">🏠 メニュー</button>
+    </nav>
+
     <div class="container">
 
-        <!-- 1. メイン画面 -->
+        <!-- 1. メインメニュー画面 -->
         <div id="main-page" class="page active">
-            <h1 style="text-align: center; margin-bottom: 30px;">臨床工学科データベース</h1>
-
+            <h2>メイン機能メニュー</h2>
             <div class="main-btn-group">
-                <button id="btn-to-worklog" type="button" class="btn">連絡事項</button>
-                <button id="btn-to-equipment" type="button" class="btn">機器台帳</button>
-                <button id="btn-to-trouble" type="button" class="btn">不具合対応</button>
-                <button id="btn-to-purchase" type="button" class="btn">物品購入</button>
-                <button id="btn-to-performance" type="button" class="btn">臨床実績</button>
-                <button id="btn-to-duty" type="button" class="btn">宿日直</button>
-                <button id="btn-to-lending" type="button" class="btn">貸出返却</button>
-                <button id="btn-to-inspection" type="button" class="btn">点検実績</button>
+                <button type="button" class="btn" onclick="openTab('worklog-page', '📋 連絡事項一覧')">連絡事項</button>
+                <button type="button" class="btn" onclick="alert('機器台帳画面は準備中です')">機器台帳</button>
+                <button type="button" class="btn" onclick="alert('不具合対応画面は準備中です')">不具合対応</button>
+                <button type="button" class="btn" onclick="alert('物品購入画面は準備中です')">物品購入</button>
+                <button type="button" class="btn" onclick="alert('臨床実績画面は準備中です')">臨床実績</button>
+                <button type="button" class="btn" onclick="alert('宿日直画面は準備中です')">宿日直</button>
+                <button type="button" class="btn" onclick="alert('貸出返却画面は準備中です')">貸出返却</button>
+                <button type="button" class="btn" onclick="alert('点検実績画面は準備中です')">点検実績</button>
             </div>
 
             <div class="sub-btn-group">
-                <button id="btn-to-daily-report" type="button" class="btn-sub">新人日報</button>
-                <button id="btn-to-annual-report" type="button" class="btn-sub">年報</button>
-                <button id="btn-to-training" type="button" class="btn-sub">研修実績</button>
+                <button type="button" class="btn-sub" onclick="alert('新人日報画面は準備中です')">新人日報</button>
+                <button type="button" class="btn-sub" onclick="alert('年報画面は準備中です')">年報</button>
+                <button type="button" class="btn-sub" onclick="alert('研修実績画面は準備中です')">研修実績</button>
             </div>
         </div>
 
@@ -317,29 +285,28 @@
         <div id="worklog-page" class="page">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <div style="display: flex; gap: 10px;">
-                    <button id="btn-to-form" type="button" class="btn" style="width: auto; margin: 0; padding: 12px 24px; font-size: 16px; background-color: #2ecc71;">＋ 新規登録</button>
-                    <button id="btn-to-past-worklog" type="button" class="btn" style="width: auto; margin: 0; padding: 12px 24px; font-size: 16px; background-color: #7f8c8d;">📁 過去の連絡事項</button>
+                    <button type="button" class="btn" style="width: auto; padding: 10px 20px; font-size: 15px; background-color: #2ecc71;" onclick="openTab('worklog-form-page', '➕ 連絡事項 新規登録')">＋ 新規登録</button>
+                    <button type="button" class="btn" style="width: auto; padding: 10px 20px; font-size: 15px; background-color: #7f8c8d;" onclick="openTab('past-worklog-page', '📁 過去の連絡事項')">📁 過去の連絡事項</button>
                 </div>
-                <button id="btn-back-main" type="button" class="btn btn-back" style="width: auto; margin: 0; padding: 12px 24px; font-size: 16px;">← メインに戻る</button>
             </div>
 
             <h2>連絡事項 一覧（未完了）</h2>
 
-            <div style="overflow-x: auto; margin-bottom: 40px;">
+            <div style="overflow-x: auto; margin-bottom: 20px;">
                 <table class="record-table">
                     <thead>
                         <tr>
                             <th style="width: 8%;">日付</th>
-                            <th style="width: 5%;">区分</th>
-                            <th style="width: 5%;">重要度</th>
-                            <th style="width: 5%;">記入者</th>
-                            <th style="width: 45%;">連絡事項</th>
-                            <th style="width: 28%;">確認状況（12名）</th>
+                            <th style="width: 8%;">区分</th>
+                            <th style="width: 8%;">重要度</th>
+                            <th style="width: 10%;">記入者</th>
+                            <th style="width: 40%;">連絡事項</th>
+                            <th style="width: 18%;">確認状況（12名）</th>
                             <th style="width: 8%;">操作</th>
                         </tr>
                     </thead>
                     <tbody id="log-table-body">
-                        <!-- 自動描画 -->
+                        <!-- app.jsから描画 -->
                     </tbody>
                 </table>
             </div>
@@ -347,17 +314,12 @@
 
         <!-- 3. 連絡事項 入力画面 -->
         <div id="worklog-form-page" class="page">
-            <div style="margin-bottom: 20px;">
-                <button id="btn-back-worklog" type="button" class="btn btn-back" style="width: auto; margin: 0; padding: 12px 24px; font-size: 16px;">← 一覧に戻る</button>
-            </div>
-
             <h2 id="form-title">連絡事項 新規登録</h2>
 
-            <div style="background-color: #f8f9fa; padding: 30px; border-radius: 8px; border: 1px solid #dee2e6;">
+            <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; border: 1px solid #dee2e6;">
                 <form id="worklog-form">
                     <input type="hidden" id="log-id">
 
-                    <!-- 日付・区分・重要度・記入者を横並びで配置 -->
                     <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 20px;">
                         <div class="form-group" style="margin-bottom: 0; width: 170px;">
                             <label for="log-date">日付</label>
@@ -385,7 +347,6 @@
                             <label for="log-author">記入者</label>
                             <select id="log-author" style="padding: 8px 10px;">
                                 <option value="">(選択なし)</option>
-                                <!-- app.jsから自動でスタッフの選択肢が追加されます -->
                             </select>
                         </div>
                     </div>
@@ -395,9 +356,9 @@
                         <textarea id="log-details" rows="6" placeholder="連絡事項の内容を入力してください" required></textarea>
                     </div>
 
-                    <div style="display: flex; gap: 15px; margin-top: 25px;">
-                        <button type="submit" class="btn" style="margin-top: 0; background-color: #2ecc71; width: auto; padding: 14px 32px; font-size: 18px;">保存する</button>
-                        <button id="btn-cancel-form" type="button" class="btn" style="margin-top: 0; background-color: #95a5a6; width: auto; padding: 14px 32px; font-size: 18px;">キャンセル</button>
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+                        <button type="submit" class="btn" style="background-color: #2ecc71; width: auto; padding: 12px 28px; font-size: 16px;">保存する</button>
+                        <button type="button" class="btn" style="background-color: #95a5a6; width: auto; padding: 12px 28px; font-size: 16px;" onclick="closeTab('worklog-form-page')">キャンセル</button>
                     </div>
                 </form>
             </div>
@@ -405,10 +366,6 @@
 
         <!-- 4. 過去の連絡事項 専用画面 -->
         <div id="past-worklog-page" class="page">
-            <div style="margin-bottom: 20px;">
-                <button id="btn-back-worklog-from-past" type="button" class="btn btn-back" style="width: auto; margin: 0; padding: 12px 24px; font-size: 16px;">← 連絡事項一覧に戻る</button>
-            </div>
-
             <h2>過去の連絡事項（全員確認済みアーカイブ）</h2>
 
             <div style="overflow-x: auto;">
@@ -416,16 +373,15 @@
                     <thead>
                         <tr style="background-color: #dcdde1;">
                             <th style="width: 8%;">日付</th>
-                            <th style="width: 5%;">区分</th>
-                            <th style="width: 5%;">重要度</th>
-                            <th style="width: 5%;">記入者</th>
-                            <th style="width: 45%;">連絡事項</th>
-                            <th style="width: 28%;">確認状況（12名）</th>
-                            <th style="width: 8%;">操作</th>
+                            <th style="width: 8%;">区分</th>
+                            <th style="width: 8%;">重要度</th>
+                            <th style="width: 10%;">記入者</th>
+                            <th style="width: 40%;">連絡事項</th>
+                            <th style="width: 26%;">確認状況（12名）</th>
                         </tr>
                     </thead>
                     <tbody id="completed-log-table-body">
-                        <!-- 自動描画 -->
+                        <!-- app.jsから描画 -->
                     </tbody>
                 </table>
             </div>
@@ -433,7 +389,54 @@
 
     </div>
 
-    <!-- JavaScriptファイルの読み込み -->
-    <script src="app.js?v=4"></script>
+    <!-- タブ制御＆既存ロジック用スクリプト -->
+    <script src="app.js?v=5"></script>
+    <script>
+        // タブ制御用 JavaScript
+        function openTab(pageId, tabTitle) {
+            const tabBar = document.getElementById('tab-bar');
+
+            // 既にタブが存在するか確認
+            let existingTab = document.getElementById(`tab-btn-${pageId}`);
+
+            if (!existingTab) {
+                // 新しいタブボタンを作成
+                const newTab = document.createElement('button');
+                newTab.className = 'tab-item';
+                newTab.id = `tab-btn-${pageId}`;
+                newTab.innerHTML = `${tabTitle} <span class="tab-close-btn" onclick="event.stopPropagation(); closeTab('${pageId}')">×</span>`;
+                newTab.onclick = () => switchTab(pageId);
+                tabBar.appendChild(newTab);
+            }
+
+            // 作成または既存のタブに切り替え
+            switchTab(pageId);
+        }
+
+        function switchTab(pageId) {
+            // すべてのページを非表示
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            // すべてのタブのactiveクラスを外す
+            document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+
+            // 該当ページとタブを表示状態にする
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) targetPage.classList.add('active');
+
+            const targetTab = document.getElementById(`tab-btn-${pageId}`) || document.querySelector('.tab-bar .tab-item:first-child');
+            if (targetTab) targetTab.classList.add('active');
+        }
+
+        function closeTab(pageId) {
+            const tabBtn = document.getElementById(`tab-btn-${pageId}`);
+            if (tabBtn) tabBtn.remove();
+
+            // 閉じたタブが開いていた場合、メインメニューに戻る
+            const targetPage = document.getElementById(pageId);
+            if (targetPage && targetPage.classList.contains('active')) {
+                switchTab('main-page');
+            }
+        }
+    </script>
 </body>
 </html>
