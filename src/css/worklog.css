@@ -1,0 +1,110 @@
+/* フォーム系 */
+.form-group {
+    margin-bottom: 15px;
+}
+
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+/* スタッフ選択用 6列×2行 グリッド */
+.staff-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px 8px;
+    width: 100%;
+    min-width: 320px;
+}
+
+.staff-checkbox-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+}
+
+    .staff-checkbox-item input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        margin: 0;
+        cursor: pointer;
+    }
+
+/* 重要度バッジ */
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+}
+
+.badge-high {
+    background-color: #e74c3c;
+}
+
+.badge-med {
+    background-color: #f39c12;
+}
+
+.badge-low {
+    background-color: #95a5a6;
+}
+
+/* テーブル設定 */
+.record-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+    background-color: #fff;
+    min-width: 900px;
+}
+
+    .record-table th, .record-table td {
+        border: 1px solid #bdc3c7;
+        padding: 10px 8px;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .record-table th {
+        background-color: #e9ecef;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+
+    .record-table tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+    .btn-delete:hover {
+        background-color: #c0392b;
+    }
+
