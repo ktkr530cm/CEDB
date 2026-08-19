@@ -1,4 +1,14 @@
-/* フォーム用スタイリング */
+/* --- 単票フォーム全体のコンテナ --- */
+.single-record-form {
+    background-color: #f8f9fa;
+    padding: 25px 30px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    max-width: 720px;      /* 単票としての横幅を統一 */
+    margin: 0 auto;
+}
+
+/* --- セクション見出し --- */
 .form-section-title {
     font-size: 16px;
     color: #333;
@@ -7,17 +17,22 @@
     margin-top: 20px;
     margin-bottom: 15px;
 }
+.form-section-title:first-of-type {
+    margin-top: 0;
+}
 
+/* --- 帳票(複数列)ではなく単票(1列)に変更 --- */
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(2, 1fr);   /* 2列 */
+    gap: 15px 20px;
     margin-bottom: 10px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
+    margin-bottom: 14px;   /* 項目間の縦の間隔 */
 }
 
     .form-group label {
@@ -34,7 +49,7 @@
         border: 1px solid #ced4da;
         border-radius: 4px;
         font-size: 14px;
-        width: 100%;
+        width: 100%;         /* すべての入力欄が親要素幅=同じ幅になる */
         box-sizing: border-box;
     }
 
@@ -46,18 +61,12 @@
             box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
 
-.col-span-2 {
-    grid-column: span 2;
-}
-
 .required {
     color: #dc3545;
     margin-left: 2px;
 }
 
-/* レスポンシブ対応 (画面が狭いときは1列に) */
-@media (max-width: 600px) {
-    .col-span-2 {
-        grid-column: span 1;
-    }
+/* col-span-2 は単票化に伴い不要になったため削除、または以下で無効化 */
+.col-span-2 {
+    grid-column: unset;
 }

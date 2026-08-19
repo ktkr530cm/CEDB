@@ -35,14 +35,14 @@
     </div>
 </div>
 
-<!-- 機器台帳 入力画面 -->
+<!-- 機器台帳 入力画面(単票フォーム) -->
 <div id="ledger-form-page" class="page">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h2 id="form-title">機器台帳 登録・編集</h2>
         <button type="button" class="btn-sub" style="width: auto; padding: 8px 16px;" onclick="cancelLedgerForm()">一覧に戻る</button>
     </div>
 
-    <form id="ledger-form" style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; border: 1px solid #dee2e6;">
+    <form id="ledger-form" class="single-record-form" onsubmit="event.preventDefault(); saveLedger();">
         <input type="hidden" id="ledger-id">
 
         <h3 class="form-section-title">基本情報</h3>
@@ -65,4 +65,102 @@
             </div>
             <div class="form-group">
                 <label for="model-name">機種名 <span class="required">*</span></label>
-                <input type="text" id="model-name" placeholder="例:
+                <input type="text" id="model-name" placeholder="例: ○○○○-100" required>
+            </div>
+            <div class="form-group">
+                <label for="manufacturer">メーカー</label>
+                <input type="text" id="manufacturer" placeholder="例: ○○メディカル">
+            </div>
+            <div class="form-group">
+                <label for="dept">部署</label>
+                <input type="text" id="dept" placeholder="例: ICU">
+            </div>
+            <div class="form-group">
+                <label for="location">配置場所</label>
+                <input type="text" id="location" placeholder="例: 3階病棟">
+            </div>
+            <div class="form-group">
+                <label for="operating-status">稼働状況</label>
+                <select id="operating-status">
+                    <option value="稼働">稼働</option>
+                    <option value="修理中">修理中</option>
+                    <option value="停止">停止</option>
+                </select>
+            </div>
+        </div>
+
+        <h3 class="form-section-title">識別情報</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="serial-number">シリアル番号</label>
+                <input type="text" id="serial-number" placeholder="例: SN-000123">
+            </div>
+            <div class="form-group">
+                <label for="asset-number">資産番号</label>
+                <input type="text" id="asset-number" placeholder="例: A-000123">
+            </div>
+            <div class="form-group">
+                <label for="ch-number">CH番号</label>
+                <input type="text" id="ch-number" placeholder="例: CH-001">
+            </div>
+            <div class="form-group">
+                <label for="barcode">バーコード</label>
+                <input type="text" id="barcode" placeholder="バーコード番号">
+            </div>
+            <div class="form-group">
+                <label for="gs1-128">GS1-128</label>
+                <input type="text" id="gs1-128" placeholder="GS1-128コード">
+            </div>
+        </div>
+
+        <h3 class="form-section-title">搬入情報</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="reg-date">登録日</label>
+                <input type="date" id="reg-date">
+            </div>
+            <div class="form-group">
+                <label for="delivery-staff">搬入担当者</label>
+                <input type="text" id="delivery-staff" placeholder="担当者名">
+            </div>
+        </div>
+
+        <h3 class="form-section-title">保守情報</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="maint-status">保守状況</label>
+                <select id="maint-status">
+                    <option value="契約あり">契約あり</option>
+                    <option value="契約なし">契約なし</option>
+                    <option value="院内対応">院内対応</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="repair-contact">修理連絡先</label>
+                <input type="text" id="repair-contact" placeholder="連絡先(電話番号等)">
+            </div>
+        </div>
+
+        <h3 class="form-section-title">備考</h3>
+   <div class="form-grid">
+     <div class="form-group col-span-2">
+        <label for="remarks">備考</label>
+        <textarea id="remarks" rows="4" placeholder="特記事項があれば入力してください"></textarea>
+     </div>
+    </div>
+
+        <h3 class="form-section-title">備考</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="remarks">備考</label>
+                <textarea id="remarks" rows="4" placeholder="特記事項があれば入力してください"></textarea>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+            <button type="submit" class="btn" style="width: auto; padding: 10px 24px; font-size: 15px;">💾 保存</button>
+            <button type="button" class="btn-sub" style="width: auto; padding: 10px 24px;" onclick="cancelLedgerForm()">キャンセル</button>
+            
+        </div>
+    </form>
+</div>
