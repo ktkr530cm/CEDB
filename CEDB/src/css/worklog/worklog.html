@@ -1,3 +1,31 @@
+<style>
+    /* スタッフ選択用 6列×2行 グリッド */
+    .staff-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 6px 8px;
+        width: 100%;
+        min-width: 320px;
+    }
+
+    .staff-checkbox-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 12px;
+        cursor: pointer;
+        white-space: nowrap;
+        user-select: none;
+    }
+
+    .staff-checkbox-item input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        margin: 0;
+        cursor: pointer;
+    }
+</style>
+
 <!-- 連絡事項一覧画面 -->
 <div id="worklog-page" class="page">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -30,7 +58,7 @@
 <div id="worklog-form-page" class="page">
     <h2 id="form-title">連絡事項 新規登録</h2>
 
-    <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; border: 1px solid #dee2e6; margin-top: 15px;">
+    <div class="worklog-form-panel" style="padding: 25px; border-radius: 8px; border: 1px solid; margin-top: 15px;">
         <form id="worklog-form">
             <input type="hidden" id="log-id">
 
@@ -70,8 +98,8 @@
             </div>
 
             <div style="display: flex; gap: 15px; margin-top: 20px;">
-                <button type="button" class="btn" onclick="saveWorklog()" style="background-color: #2ecc71; width: auto; padding: 12px 28px; font-size: 16px;">保存する</button>
-                <button type="button" class="btn" style="background-color: #95a5a6; width: auto; padding: 12px 28px; font-size: 16px;" onclick="cancelWorklogForm()">キャンセル</button>
+                <button type="button" class="btn btn-save" onclick="saveWorklog()" style="width: auto; padding: 12px 28px; font-size: 16px;">保存する</button>
+                <button type="button" class="btn btn-cancel" style="width: auto; padding: 12px 28px; font-size: 16px;" onclick="cancelWorklogForm()">キャンセル</button>
             </div>   
         </form>
     </div>

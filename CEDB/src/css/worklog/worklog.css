@@ -59,10 +59,6 @@
     background-color: #e74c3c;
 }
 
-.badge-med {
-    background-color: #f39c12;
-}
-
 .badge-low {
     background-color: #95a5a6;
 }
@@ -108,3 +104,17 @@
         background-color: #c0392b;
     }
 
+/* 連絡事項フォームのパネル */
+.worklog-form-panel {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+/* 保存・キャンセルボタンの色 */
+.btn-save {
+    background-color: #2ecc71;
+}
+
+.btn-cancel {
+    background-color: #95a5a6;
+}
