@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>連絡事項一覧</title>
+    <link rel="stylesheet" href="worklog.css">
+</head>
+<body>
+
+<!-- 連絡事項一覧画面 -->
+<div id="worklog-page" class="page active">
+    <div class="header-container">
+        <h2>連絡事項一覧</h2>
+    </div>
+    <div>
+        <button type="button" class="btn" onclick="openNewWorklogForm()">＋ 新規作成</button>
+        <button type="button" class="btn btn-sub" onclick="switchWorklogTab('past-worklog-page')">過去アーカイブ</button>
+    </div>
+
+    <div>
+        <table class="record-table">
+            <thead>
+                <tr>
+                    <th>日付</th>
+                    <th>区分</th>
+                    <th>重要度</th>
+                    <th>記入者</th>
+                    <th>連絡事項</th>
+                    <th>確認状況</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="log-table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 連絡事項 入力画面 -->
+<div id="worklog-form-page" class="page">
+    <h2 id="form-title">連絡事項 新規登録</h2>
+
+    <div class="worklog-form-panel">
+        <form id="worklog-form">
+            <input type="hidden" id="log-id">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="log-date">日付</label>
+                    <input type="date" id="log-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="log-category">区分</label>
+                    <select id="log-category">
+                        <option value="臨床">臨床</option>
+                        <option value="会議">会議</option>
+                        <option value="打合せ">打合せ</option>
+                        <option value="学習会">学習会</option>
+                        <option value="その他">その他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="log-priority">重要度</label>
+                    <select id="log-priority">
+                        <option value="通常">通常</option>
+                        <option value="至急">至急</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="log-author">記入者</label>
+                    <select id="log-author">
+                        <option value="">(選択なし)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="log-details">連絡事項</label>
+                <textarea id="log-details" rows="6" placeholder="連絡事項の内容を入力してください" required></textarea>
+            </div>
+
+            <div class="form-buttons">
+                <button type="button" class="btn btn-save" onclick="saveWorklog()">保存する</button>
+                <button type="button" class="btn btn-cancel" onclick="cancelWorklogForm()">キャンセル</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 過去の連絡事項 アーカイブ画面 -->
+<div id="past-worklog-page" class="page">
+    <div class="header-container">
+        <h2>過去の連絡事項（全員確認済みアーカイブ）</h2>
+        <div>
+            <button type="button" class="btn btn-sub" onclick="switchWorklogTab('worklog-page')">一覧へ戻る</button>
+        </div>
+    </div>
+
+    <div>
+        <table class="record-table">
+            <thead>
+                <tr>
+                    <th>日付</th>
+                    <th>区分</th>
+                    <th>重要度</th>
+                    <th>記入者</th>
+                    <th>連絡事項</th>
+                    <th>確認状況</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="completed-log-table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- JavaScriptの読み込み -->
+<script src="worklog.js"></script>
+</body>
+</html>

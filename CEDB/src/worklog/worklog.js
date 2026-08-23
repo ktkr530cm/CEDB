@@ -4,34 +4,16 @@ const staffList = ["笹岡", "野村", "下平", "高橋", "阿部", "北原", "
 // ローカルストレージ用のキー名
 const STORAGE_KEY = 'worklog_data_list';
 
-// --- タブ切替関数のフォールバック ---
-if (typeof window.openTab !== 'function') {
-    window.openTab = function (pageId, tabTitle) {
-        document.querySelectorAll('.page').forEach(page => {
-            page.classList.remove('active');
-        });
-        const targetPage = document.getElementById(pageId);
-        if (targetPage) {
-            targetPage.classList.add('active');
-        }
-
-        const tabBar = document.getElementById('tab-bar');
-        if (tabBar) {
-            let existingTab = document.getElementById(`tab-btn-${pageId}`);
-            if (!existingTab) {
-                const displayTitle = tabTitle || (pageId === 'worklog-form-page' ? '📝 新規登録' : '画面');
-                const newTab = document.createElement('button');
-                newTab.className = 'tab-item';
-                newTab.id = `tab-btn-${pageId}`;
-                newTab.innerHTML = `${displayTitle} <span class="tab-close-btn" onclick="event.stopPropagation(); closeTab('${pageId}')">×</span>`;
-                newTab.onclick = () => switchTab(pageId);
-                tabBar.appendChild(newTab);
-            }
-            if (typeof window.switchTab === 'function') {
-                window.switchTab(pageId);
-            }
-        }
-    };
+// --- タブ（画面）切替関数 ---
+// ※ main.js側のグローバル関数 openTab と名前が衝突しないよう switchWorklogTab に統一
+function switchWorklogTab(pageId) {
+    document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+    });
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.classList.add('active');
+    }
 }
 
 // 日本時間の「今日の日付（yyyy-mm-dd）」を取得する共通関数
@@ -106,7 +88,7 @@ function editWorklog(id, date, category, priority, author, details) {
     if (authorInput) authorInput.value = author || "";
     if (detailsInput) detailsInput.value = details || "";
 
-    openTab('worklog-form-page', id ? '✏️ 編集' : '📝 新規登録');
+    switchWorklogTab('worklog-form-page');
 }
 
 // --- フォームリセット処理 ---
@@ -143,14 +125,12 @@ function saveWorklog() {
     const existingIndex = logs.findIndex(item => item.id === logId);
 
     if (existingIndex >= 0) {
-        // 既存データの更新
         logs[existingIndex].date = formattedDate;
         logs[existingIndex].category = category;
         logs[existingIndex].priority = priority;
         logs[existingIndex].author = author;
         logs[existingIndex].details = details;
     } else {
-        // 新規データの追加（記入者には自動チェック [author]）
         logs.unshift({
             id: logId,
             date: formattedDate,
@@ -162,14 +142,10 @@ function saveWorklog() {
         });
     }
 
-    // LocalStorage に永続保存
     saveStoredLogs(logs);
-
-    // 一覧の再描画
     renderAllLogs();
-
     resetWorklogForm();
-    cancelWorklogForm();
+    switchWorklogTab('worklog-page');
 }
 
 // --- 削除処理 ---
@@ -184,9 +160,8 @@ function deleteWorklog(logId) {
 
 // --- キャンセルボタンを押した時の処理 ---
 function cancelWorklogForm() {
-    const formTab = document.getElementById('tab-btn-worklog-form-page');
-    if (formTab) formTab.remove();
-    openTab('worklog-page', '連絡事項一覧');
+    resetWorklogForm();
+    switchWorklogTab('worklog-page');
 }
 
 // --- スタッフチェック切り替え処理 ---
@@ -199,58 +174,13 @@ function toggleStaffConfirm(logId, staff) {
 
         const index = targetLog.confirmedStaff.indexOf(staff);
         if (index >= 0) {
-            targetLog.confirmedStaff.splice(index, 1); // チェック解除
+            targetLog.confirmedStaff.splice(index, 1);
         } else {
-            targetLog.confirmedStaff.push(staff); // チェック追加
+            targetLog.confirmedStaff.push(staff);
         }
 
-        // 状態保存
         saveStoredLogs(logs);
-
-        // DOMでの移動処理（アニメーション連動）
-        const checkbox = document.querySelector(`input[data-log-id="${logId}"][data-staff="${staff}"]`);
-        if (checkbox) {
-            const tr = checkbox.closest('tr');
-            if (tr) {
-                const isAllChecked = staffList.every(s => targetLog.confirmedStaff.includes(s));
-                if (isAllChecked) {
-                    archiveLog(tr);
-                } else {
-                    unarchiveLog(tr);
-                }
-            }
-        }
-    }
-}
-
-// --- アーカイブ（過去の連絡事項へ移動）処理 ---
-function archiveLog(trElement) {
-    const completedTableBody = document.getElementById("completed-log-table-body");
-    if (!completedTableBody) return;
-
-    trElement.style.transition = "background-color 0.4s ease";
-    trElement.style.backgroundColor = "#c8f7dc";
-
-    setTimeout(() => {
-        completedTableBody.insertBefore(trElement, completedTableBody.firstChild);
-        trElement.style.backgroundColor = "#e8f8f5";
-    }, 300);
-}
-
-// --- 未完了に戻す（メイン一覧へ戻す）処理 ---
-function unarchiveLog(trElement) {
-    const mainTableBody = document.getElementById("log-table-body");
-    const completedTableBody = document.getElementById("completed-log-table-body");
-
-    if (completedTableBody && completedTableBody.contains(trElement)) {
-        if (!mainTableBody) return;
-
-        mainTableBody.insertBefore(trElement, mainTableBody.firstChild);
-        trElement.style.transition = "background-color 0.6s ease";
-        trElement.style.backgroundColor = "#e8f8f5";
-
-        void trElement.offsetHeight; // 強制リフロー
-        trElement.style.backgroundColor = "white";
+        renderAllLogs();
     }
 }
 
@@ -267,18 +197,13 @@ function renderAllLogs() {
     const logs = getStoredLogs();
 
     logs.forEach(log => {
-        let badgeHtml = '';
-        if (log.priority === '至急') {
-            badgeHtml = '<span class="badge badge-high">至急</span>';
-  
-        } else {
-            badgeHtml = '<span class="badge badge-low">通常</span>';
-        }
+        let badgeHtml = log.priority === '至急'
+            ? '<span class="badge badge-high">至急</span>'
+            : '<span class="badge badge-low">通常</span>';
 
         const safeDetails = (log.details || "").replace(/'/g, "\\'").replace(/\n/g, " ");
         const confirmedStaff = log.confirmedStaff || [];
 
-        // 全員チェック済みかどうか判断
         const isAllChecked = staffList.every(s => confirmedStaff.includes(s));
 
         const rowHtml = `
@@ -290,7 +215,7 @@ function renderAllLogs() {
                 <td>${log.details}</td>
                 <td onclick="event.stopPropagation();">${renderStaffCheckboxes(log.id, confirmedStaff)}</td>
                 <td onclick="event.stopPropagation();">
-                    <button class="btn-delete" onclick="deleteWorklog('${log.id}')">削除</button>
+                    <button type="button" class="btn-delete" onclick="deleteWorklog('${log.id}')">削除</button>
                 </td>
             </tr>
         `;
@@ -316,26 +241,18 @@ function initWorklog() {
         });
     }
 
-    // 保存されているデータを描画
     renderAllLogs();
 }
 
 // --- ページ読み込み時の処理 ---
-document.addEventListener("DOMContentLoaded", () => {
-    fetch('./worklog.html')
-        .then(response => {
-            if (!response.ok) throw new Error('HTMLファイルの読み込みに失敗しました: ' + response.status);
-            return response.text();
-        })
-        .then(data => {
-            const container = document.getElementById('worklog-container');
-            if (container) {
-                container.innerHTML = data;
-                initWorklog();
-            }
-        })
-        .catch(err => {
-            console.error("エラーが発生しました:", err);
-        });
-});
 
+// 関数を外部（メインタブ）から呼び出せるようにグローバル公開
+window.initWorklog = initWorklog;
+window.renderAllLogs = renderAllLogs;
+
+// 単体起動・動的読み込み両対応の実行判定
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initWorklog();
+} else {
+    document.addEventListener("DOMContentLoaded", initWorklog);
+}
