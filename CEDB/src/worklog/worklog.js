@@ -57,15 +57,22 @@ function openNewWorklogForm() {
     editWorklog('', '', '臨床', '通常', '', '');
 }
 
+// --- 行ダブルクリック時のID経由の編集処理 ---
+function editWorklogById(id) {
+    const logs = getStoredLogs();
+    const log = logs.find(item => item.id === id);
+    if (log) {
+        editWorklog(log.id, log.date, log.category, log.priority, log.author, log.details);
+    }
+}
+
+// 外部呼び出し用にグローバル展開
+window.editWorklogById = editWorklogById;
+
 // --- 行ダブルクリック（編集）および新規作成の共通処理 ---
 function editWorklog(id, date, category, priority, author, details) {
     const formTitle = document.getElementById("form-title");
-    if (formTitle) {
-        formTitle.textContent = id ? "連絡事項 編集" : "連絡事項 新規登録";
-    }
-
-    const idInput = document.getElementById("log-id");
-    const dateInput = document.getElementById("log-date");
+     const dateInput = document.getElementById("log-date");
     const categoryInput = document.getElementById("log-category");
     const priorityInput = document.getElementById("log-priority");
     const authorInput = document.getElementById("log-author");
@@ -185,6 +192,7 @@ function toggleStaffConfirm(logId, staff) {
 }
 
 // --- 画面上のすべてのデータ行を描画・復元する ---
+// --- 画面上のすべてのデータ行を描画・復元する ---
 function renderAllLogs() {
     const mainTableBody = document.getElementById("log-table-body");
     const completedTableBody = document.getElementById("completed-log-table-body");
@@ -201,24 +209,48 @@ function renderAllLogs() {
             ? '<span class="badge badge-high">至急</span>'
             : '<span class="badge badge-low">通常</span>';
 
-        const safeDetails = (log.details || "").replace(/'/g, "\\'").replace(/\n/g, " ");
         const confirmedStaff = log.confirmedStaff || [];
-
         const isAllChecked = staffList.every(s => confirmedStaff.includes(s));
 
-        const rowHtml = `
-            <tr style="cursor: pointer; ${isAllChecked ? 'background-color: #e8f8f5;' : ''}" ondblclick="editWorklog('${log.id}', '${log.date}', '${log.category}', '${log.priority}', '${log.author}', '${safeDetails}')">
-                <td>${log.date}</td>
-                <td>${log.category}</td>
-                <td>${badgeHtml}</td>
-                <td>${log.author}</td>
-                <td>${log.details}</td>
-                <td onclick="event.stopPropagation();">${renderStaffCheckboxes(log.id, confirmedStaff)}</td>
-                <td onclick="event.stopPropagation();">
-                    <button type="button" class="btn-delete" onclick="deleteWorklog('${log.id}')">削除</button>
-                </td>
-            </tr>
+        // HTML表示用にエスケープ処理（改行は \n のまま保持）
+        const safeDisplayDetails = (log.details || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+        // 1. 行要素 (tr) を作成
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        if (isAllChecked) {
+            tr.style.backgroundColor = '#e8f8f5';
+        }
+
+        // 2. ダブルクリックイベントを直接JavaScriptで設定（これで改行が消えません）
+        tr.addEventListener('dblclick', () => {
+            editWorklogById(log.id);
+        });
+
+        // 3. 中身のセルを作成
+        tr.innerHTML = `
+            <td>${log.date}</td>
+            <td>${log.category}</td>
+            <td>${badgeHtml}</td>
+            <td>${log.author}</td>
+            <td class="details-cell">${safeDisplayDetails}</td>
+            <td onclick="event.stopPropagation();">${renderStaffCheckboxes(log.id, confirmedStaff)}</td>
+            <td onclick="event.stopPropagation();">
+                <button type="button" class="btn-delete" onclick="deleteWorklog('${log.id}')">削除</button>
+            </td>
         `;
+
+        // 4. テーブルに追加
+        if (isAllChecked) {
+            completedTableBody.appendChild(tr);
+        } else {
+            mainTableBody.appendChild(tr);
+        }
+    });
+}
 
         if (isAllChecked) {
             completedTableBody.insertAdjacentHTML('beforeend', rowHtml);
@@ -249,6 +281,7 @@ function initWorklog() {
 // 関数を外部（メインタブ）から呼び出せるようにグローバル公開
 window.initWorklog = initWorklog;
 window.renderAllLogs = renderAllLogs;
+window.editWorklogById = editWorklogById;
 
 // 単体起動・動的読み込み両対応の実行判定
 if (document.readyState === 'complete' || document.readyState === 'interactive') {

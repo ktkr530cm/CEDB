@@ -34,6 +34,7 @@ body {
     border-radius: 4px;
     cursor: pointer;
     text-decoration: none;
+    
 }
 
 .btn:hover {
@@ -61,6 +62,7 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
+    
 }
 
 .btn-delete:hover {
@@ -101,12 +103,14 @@ body {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 24px;
     box-sizing: border-box;
 }
 
 .form-buttons {
     display: flex;
+     justify-content: flex-end; 
+     padding: 10px 20px;
     gap: 10px;
     margin-top: 15px;
 }
@@ -172,6 +176,8 @@ body {
     padding: 10px 8px;
     text-align: left;
     vertical-align: middle;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .record-table th {
@@ -182,4 +188,25 @@ body {
 
 .record-table tr:nth-child(even) {
     background-color: #f8f9fa;
+}
+
+/* 新規作成・過去アーカイブボタンの右寄せ＋小型化 */
+.btn-group-right {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.btn-sm {
+    padding: 10px 20px;
+    font-size: 24px;
+    width: auto;
+    min-height: auto;
+}
+
+/* 連絡事項の入力欄（textarea）の設定 */
+#log-details {
+    white-space: pre-wrap;
+    word-break: break-word;
 }

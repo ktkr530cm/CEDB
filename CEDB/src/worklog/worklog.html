@@ -13,10 +13,10 @@
     <div class="header-container">
         <h2>連絡事項一覧</h2>
     </div>
-    <div>
-        <button type="button" class="btn" onclick="openNewWorklogForm()">＋ 新規作成</button>
-        <button type="button" class="btn btn-sub" onclick="switchWorklogTab('past-worklog-page')">過去アーカイブ</button>
-    </div>
+    <div class="btn-group-right">
+    <button type="button" class="btn btn-sm" onclick="openNewWorklogForm()">＋ 新規作成</button>
+    <button type="button" class="btn btn-sub btn-sm" onclick="switchWorklogTab('past-worklog-page')">過去アーカイブ</button>
+</div>
 
     <div>
         <table class="record-table">
@@ -80,8 +80,8 @@
             </div>
 
             <div class="form-buttons">
-                <button type="button" class="btn btn-save" onclick="saveWorklog()">保存する</button>
-                <button type="button" class="btn btn-cancel" onclick="cancelWorklogForm()">キャンセル</button>
+               <button type="button" class="btn btn-save btn-sm" onclick="saveWorklog()">保存する</button>
+                <button type="button" class="btn btn-cancel btn-sm" onclick="cancelWorklogForm()">キャンセル</button>
             </div>
         </form>
     </div>
