@@ -1,3 +1,39 @@
+.record-table th,
+.record-table td {
+    border: 1px solid #bdc3c7;
+    padding: 10px 8px;
+    text-align: center;   /* left → center に変更 */
+    vertical-align: middle;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.record-table th:nth-child(1),
+.record-table td:nth-child(1) { width: 85px; }   /* 日付 */
+
+.record-table th:nth-child(2),
+.record-table td:nth-child(2) { width: 60px; }   /* 区分 */
+
+.record-table th:nth-child(3),
+.record-table td:nth-child(3) { width: 60px; }   /* 重要度 */
+
+.record-table th:nth-child(4),
+.record-table td:nth-child(4) { width: 60px; }   /* 記入者 */
+
+/* 5列目（連絡事項）は指定なし＝残りの幅を自動で埋める */
+
+.record-table th:nth-child(6),
+.record-table td:nth-child(6) { width: 250px; }  /* 確認状況 */
+
+.record-table th:nth-child(7),
+.record-table td:nth-child(7) { /* 操作 */
+    width: 60px; 
+　　display: flex;
+    align-items: center;
+    justify-content: center;
+}  
+　
+
 /* 全体基本スタイル */
 body {
     font-family: sans-serif;
@@ -29,7 +65,7 @@ body {
     font-size: 14px;
     font-weight: bold;
     color: #fff;
-    background-color: #3498db;
+    background-color: #55db34;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -62,7 +98,10 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    
+    display: inline-flex;      /* 追加 */
+    align-items: center;       /* 追加 */
+    justify-content: center;   /* 追加 */
+    line-height: 1;            /* 追加：余分な行高を排除 */
 }
 
 .btn-delete:hover {
@@ -80,7 +119,8 @@ body {
 .form-row {
     display: flex;
     gap: 15px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    max-width: 50%;
 }
 
 .form-group {
@@ -103,7 +143,7 @@ body {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 24px;
+    font-size: 14px;
     box-sizing: border-box;
 }
 
@@ -115,30 +155,40 @@ body {
     margin-top: 15px;
 }
 
+
 /* スタッフグリッド */
 .staff-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 6px 8px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px 2px;
     width: 100%;
-    min-width: 320px;
+    min-width: 0;
 }
 
 .staff-checkbox-item {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
-    font-size: 12px;
+    gap: 2px;
+    font-size: 14px;
     cursor: pointer;
     white-space: nowrap;
     user-select: none;
+    min-width: 0;         /* ← 追加：各アイテムが縮められるようにする */
+    overflow: hidden;      /* ← はみ出た分は隠す */
 }
 
 .staff-checkbox-item input[type="checkbox"] {
-    width: 14px;
-    height: 14px;
+    width: 15px;
+    height: 15px;
     margin: 0;
     cursor: pointer;
+    transform: scale(0.7);   
+    transform-origin: center;
+}
+
+.staff-cell {
+    width: 50px;      /* 好きな幅に調整 */
+    max-width: 180px;
 }
 
 /* 重要度バッジ */
@@ -163,6 +213,7 @@ body {
 /* テーブル設定 */
 .record-table {
     width: 100%;
+    table-layout: fixed;  
     border-collapse: collapse;
     margin-top: 10px;
     font-size: 14px;
@@ -200,7 +251,7 @@ body {
 
 .btn-sm {
     padding: 10px 20px;
-    font-size: 24px;
+    font-size: 16px;
     width: auto;
     min-height: auto;
 }

@@ -72,7 +72,8 @@ window.editWorklogById = editWorklogById;
 // --- 行ダブルクリック（編集）および新規作成の共通処理 ---
 function editWorklog(id, date, category, priority, author, details) {
     const formTitle = document.getElementById("form-title");
-     const dateInput = document.getElementById("log-date");
+    const idInput = document.getElementById("log-id");
+    const dateInput = document.getElementById("log-date");
     const categoryInput = document.getElementById("log-category");
     const priorityInput = document.getElementById("log-priority");
     const authorInput = document.getElementById("log-author");
@@ -94,6 +95,8 @@ function editWorklog(id, date, category, priority, author, details) {
     if (priorityInput) priorityInput.value = priority || "通常";
     if (authorInput) authorInput.value = author || "";
     if (detailsInput) detailsInput.value = details || "";
+
+    if (formTitle) formTitle.textContent = id ? "連絡事項 編集" : "連絡事項 新規登録";
 
     switchWorklogTab('worklog-form-page');
 }
@@ -192,7 +195,6 @@ function toggleStaffConfirm(logId, staff) {
 }
 
 // --- 画面上のすべてのデータ行を描画・復元する ---
-// --- 画面上のすべてのデータ行を描画・復元する ---
 function renderAllLogs() {
     const mainTableBody = document.getElementById("log-table-body");
     const completedTableBody = document.getElementById("completed-log-table-body");
@@ -230,14 +232,14 @@ function renderAllLogs() {
             editWorklogById(log.id);
         });
 
-        // 3. 中身のセルを作成
+         // 3. 中身のセルを作成（確認状況セルは1つだけ）
         tr.innerHTML = `
             <td>${log.date}</td>
             <td>${log.category}</td>
             <td>${badgeHtml}</td>
             <td>${log.author}</td>
             <td class="details-cell">${safeDisplayDetails}</td>
-            <td onclick="event.stopPropagation();">${renderStaffCheckboxes(log.id, confirmedStaff)}</td>
+            <td class="staff-cell" onclick="event.stopPropagation();">${renderStaffCheckboxes(log.id, confirmedStaff)}</td>
             <td onclick="event.stopPropagation();">
                 <button type="button" class="btn-delete" onclick="deleteWorklog('${log.id}')">削除</button>
             </td>
@@ -248,14 +250,6 @@ function renderAllLogs() {
             completedTableBody.appendChild(tr);
         } else {
             mainTableBody.appendChild(tr);
-        }
-    });
-}
-
-        if (isAllChecked) {
-            completedTableBody.insertAdjacentHTML('beforeend', rowHtml);
-        } else {
-            mainTableBody.insertAdjacentHTML('beforeend', rowHtml);
         }
     });
 }
