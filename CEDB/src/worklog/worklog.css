@@ -26,12 +26,7 @@
 .record-table td:nth-child(6) { width: 250px; }  /* 確認状況 */
 
 .record-table th:nth-child(7),
-.record-table td:nth-child(7) { /* 操作 */
-    width: 60px; 
-　　display: flex;
-    align-items: center;
-    justify-content: center;
-}  
+.record-table td:nth-child(7) { width: 60px; }  /* 操作 */
 　
 
 /* 全体基本スタイル */
@@ -67,10 +62,10 @@ body {
     color: #fff;
     background-color: #55db34;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     text-decoration: none;
-    
+    min-height: 40px;
 }
 
 .btn:hover {
@@ -79,8 +74,12 @@ body {
 
 .btn-sub {
     background-color: #7f8c8d;
-    margin-left: 8px;
+    margin-left: 0px;
+    padding: 3px 12px;
+    border-radius: 6px;
+    line-height: 1;
 }
+
 
 .btn-save {
     background-color: #2ecc71;
@@ -90,23 +89,30 @@ body {
     background-color: #95a5a6;
 }
 
+.delete-cell-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+}
+
 .btn-delete {
     background-color: #e74c3c;
     color: white;
     border: none;
     padding: 6px 12px;
-    border-radius: 4px;
+    border-radius: 15px;
     cursor: pointer;
     font-weight: bold;
     display: inline-flex;      /* 追加 */
     align-items: center;       /* 追加 */
     justify-content: center;   /* 追加 */
     line-height: 1;            /* 追加：余分な行高を排除 */
+    margin: 0;
+    white-space: nowrap;   /* 追加：文字を折り返さない */
+    flex-shrink: 0;        /* 追加：親に押しつぶされて縮まないようにする */
 }
 
-.btn-delete:hover {
-    background-color: #c0392b;
-}
 
 /* フォーム構造 */
 .worklog-form-panel {
@@ -126,7 +132,7 @@ body {
 .form-group {
     margin-bottom: 15px;
     flex: 1;
-    min-width: 150px;
+    min-width: 0px;
 }
 
 .form-group label {
@@ -142,7 +148,7 @@ body {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 14px;
     box-sizing: border-box;
 }
@@ -160,7 +166,7 @@ body {
 .staff-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 2px 2px;
+    gap: 1% 1%;
     width: 100%;
     min-width: 0;
 }
@@ -178,8 +184,8 @@ body {
 }
 
 .staff-checkbox-item input[type="checkbox"] {
-    width: 15px;
-    height: 15px;
+    width: 30px;
+    height: 30px;
     margin: 0;
     cursor: pointer;
     transform: scale(0.7);   
@@ -218,7 +224,7 @@ body {
     margin-top: 10px;
     font-size: 14px;
     background-color: #fff;
-    min-width: 900px;
+    min-width: 0;
 }
 
 .record-table th,
@@ -260,4 +266,19 @@ body {
 #log-details {
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+/* 行の背景色をなめらかに変化させるための共通設定 */
+.record-row {
+    transition: background-color 0.3s ease;
+}
+
+/* 全員確認済み（過去アーカイブ側）の通常時の背景色 */
+.record-complete {
+    background-color: #e8f8f5;
+}
+
+/* 全員チェックが揃った瞬間、一時的に鮮やかな緑にするアニメーション用クラス */
+.record-complete-animate {
+    background-color: #e8f8f5 !important;
 }

@@ -178,21 +178,48 @@ function cancelWorklogForm() {
 function toggleStaffConfirm(logId, staff) {
     let logs = getStoredLogs();
     const targetLog = logs.find(item => item.id === logId);
-
+ 
     if (targetLog) {
         if (!targetLog.confirmedStaff) targetLog.confirmedStaff = [];
-
+ 
         const index = targetLog.confirmedStaff.indexOf(staff);
         if (index >= 0) {
             targetLog.confirmedStaff.splice(index, 1);
         } else {
             targetLog.confirmedStaff.push(staff);
         }
-
+ 
         saveStoredLogs(logs);
+ 
+        const isAllChecked = staffList.every(s => targetLog.confirmedStaff.includes(s));
+ 
+        if (isAllChecked) {
+            // 全員チェック済みになった瞬間は、即座に移動させず
+            // 一旦その場で緑色に変化するアニメーションを見せてから移動する
+            animateCompletionThenRender(logId);
+        } else {
+            renderAllLogs();
+        }
+    }
+}
+ 
+// --- 全員確認済みになった行を、緑に変化させてから一覧を再描画（＝アーカイブへ移動）する ---
+function animateCompletionThenRender(logId) {
+    const row = document.querySelector(`tr[data-log-id="${logId}"]`);
+ 
+    if (row) {
+        // アニメーション用クラスを付与（CSS側のtransitionでなめらかに緑化）
+        row.classList.add('record-complete-animate');
+ 
+        // アニメーションが視認できる時間だけ待ってから、実際の移動（再描画）を行う
+        setTimeout(() => {
+            renderAllLogs();
+        }, 300);
+    } else {
         renderAllLogs();
     }
 }
+ 
 
 // --- 画面上のすべてのデータ行を描画・復元する ---
 function renderAllLogs() {
@@ -223,8 +250,10 @@ function renderAllLogs() {
         // 1. 行要素 (tr) を作成
         const tr = document.createElement('tr');
         tr.style.cursor = 'pointer';
+        tr.dataset.logId = log.id;
+        tr.classList.add('record-row');
         if (isAllChecked) {
-            tr.style.backgroundColor = '#e8f8f5';
+            tr.classList.add('record-complete');
         }
 
         // 2. ダブルクリックイベントを直接JavaScriptで設定（これで改行が消えません）
@@ -241,8 +270,10 @@ function renderAllLogs() {
             <td class="details-cell">${safeDisplayDetails}</td>
             <td class="staff-cell" onclick="event.stopPropagation();">${renderStaffCheckboxes(log.id, confirmedStaff)}</td>
             <td onclick="event.stopPropagation();">
-                <button type="button" class="btn-delete" onclick="deleteWorklog('${log.id}')">削除</button>
-            </td>
+       　　　　<div class="delete-cell-wrap">
+           　　　<button type="button" class="btn-delete" onclick="deleteWorklog('${log.id}')">削除</button>
+       　　　　</div>
+   　　　　　</td>
         `;
 
         // 4. テーブルに追加

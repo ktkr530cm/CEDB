@@ -84,7 +84,7 @@ async function showPage(pageId) {
                         newScript.setAttribute(attr.name, attr.value);
                     });
                     if (oldScript.hasAttribute('src')) {
-                        newScript.src = new URL(oldScript.getAttribute('src'), scriptBaseUrl).href;
+                        newScript.src = new URL(oldScript.getAttribute('src'), scriptBaseUrl).href + '?t=' + Date.now();
                     } else {
                         newScript.textContent = oldScript.textContent;
                     }
