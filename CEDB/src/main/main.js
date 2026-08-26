@@ -1,24 +1,36 @@
 // ------------------------------------------------------------
-// 画面切り替え制御（タブなし・シングルビュー版）
+// 画面切り替え制御（タブ表示版）
 // ------------------------------------------------------------
 // フォルダ構成: main フォルダと同じ階層に各画面フォルダを配置
 //
-// ※タブ機能（開く/切替/閉じる/履歴）は tabs.js に分離済み。
-//   このファイルは「クリックしたら画面がそのまま切り替わる」だけの
-//   シンプルな挙動になっています。
+// ※旧 tabs.js の機能（開く/切替/閉じる/履歴）をこのファイルに統合。
+//   さらに旧 app.js の改善点（fetchのキャッシュ無効化、
+//   スタイル/スクリプト読み込み時のタイムスタンプ付与）も維持しています。
 
 const pageRoutes = {
     'worklog-page': '../worklog/worklog.html',
     'ledger-page': '../ledger/ledger.html'
 };
 
+// 閲覧履歴の記録
+let tabHistory = ['main-page'];
+
+// pageIdからデフォルトのタブタイトルを割り当てる（tabTitle省略時のフォールバック）
+const defaultTabTitles = {
+    'worklog-page': '📋連絡事項一覧',
+    'worklog-form-page': '📝連絡事項入力',
+    'past-worklog-page': '過去アーカイブ',
+    'ledger-page': '機器台帳'
+};
+
 // メイン画面のボタンクリック時のハンドラー関数
 function handleMenuClick(button) {
     const target = button.dataset.target;
+    const title = button.dataset.title;
     const label = button.textContent.trim();
 
-    if (target) {
-        showPage(target);
+    if (target && title) {
+        openTab(target, title);
     } else {
         alert(`${label}画面は準備中です`);
     }
@@ -46,92 +58,148 @@ function loadPageStyles(fetchedDoc, pagePath) {
     });
 }
 
-// 指定した画面を読み込んで表示する（タブは作らず、常に1画面だけ表示）
-async function showPage(pageId) {
-    let pageDiv = document.getElementById(pageId);
+// 指定した画面をタブとして開く（既存タブがあれば再利用して切り替えるだけ）
+async function openTab(pageId, tabTitle) {
+    const displayTitle = tabTitle || defaultTabTitles[pageId] || '画面';
+    const tabBar = document.getElementById('tab-bar');
+    let existingTab = document.getElementById(`tab-btn-${pageId}`);
 
-    if (!pageDiv) {
-        const container = document.getElementById('main-container');
-        const path = pageRoutes[pageId];
+    if (!existingTab) {
+        let pageDiv = document.getElementById(pageId);
+        if (!pageDiv) {
+            const container = document.getElementById('main-container');
+            const path = pageRoutes[pageId];
 
-        if (path) {
-            try {
-                const res = await fetch(path, { cache: 'no-store' });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const html = await res.text();
+            if (path) {
+                try {
+                    const res = await fetch(path, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const html = await res.text();
 
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
 
-                loadPageStyles(doc, path);
+                    loadPageStyles(doc, path);
 
-                // <script>タグはappendChildしても実行されないため、
-                // 別扱いにして後でcreateElementし直す
-                const scriptEls = [];
-                Array.from(doc.body.children).forEach(child => {
-                    if (child.tagName === 'SCRIPT') {
-                        scriptEls.push(child);
-                    } else {
-                        container.appendChild(child);
-                    }
-                });
-
-                // スクリプトを新規に作り直して実行させる
-                const scriptBaseUrl = new URL(path, document.baseURI);
-                scriptEls.forEach(oldScript => {
-                    const newScript = document.createElement('script');
-                    Array.from(oldScript.attributes).forEach(attr => {
-                        newScript.setAttribute(attr.name, attr.value);
+                    // <script>タグはappendChildしても実行されないため、
+                    // 別扱いにして後でcreateElementし直す
+                    const scriptEls = [];
+                    Array.from(doc.body.children).forEach(child => {
+                        if (child.tagName === 'SCRIPT') {
+                            scriptEls.push(child);
+                        } else {
+                            container.appendChild(child);
+                        }
                     });
-                    if (oldScript.hasAttribute('src')) {
-                        newScript.src = new URL(oldScript.getAttribute('src'), scriptBaseUrl).href + '?t=' + Date.now();
-                    } else {
-                        newScript.textContent = oldScript.textContent;
+
+                    // スクリプトを新規に作り直して実行させる
+                    const scriptBaseUrl = new URL(path, document.baseURI);
+                    scriptEls.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => {
+                            newScript.setAttribute(attr.name, attr.value);
+                        });
+                        if (oldScript.hasAttribute('src')) {
+                            newScript.src = new URL(oldScript.getAttribute('src'), scriptBaseUrl).href + '?t=' + Date.now();
+                        } else {
+                            newScript.textContent = oldScript.textContent;
+                        }
+                        document.body.appendChild(newScript);
+                    });
+
+                    // 各画面の初期化は各画面のJS（例: worklog.js）側の
+                    // 自己実行ロジック（DOMContentLoaded / readyStateチェック）に任せる。
+                    // ここで初期化関数を直接呼ぶと、タブを閉じて再度開いた際に
+                    // 古い関数参照と新しいスクリプトの自己初期化が二重実行されるため行わない。
+
+                    pageDiv = document.getElementById(pageId);
+
+                    if (!pageDiv) {
+                        pageDiv = document.createElement('div');
+                        pageDiv.id = pageId;
+                        pageDiv.className = 'page';
+                        pageDiv.innerHTML = `<p>${displayTitle}の内容が見つかりませんでした</p>`;
+                        container.appendChild(pageDiv);
                     }
-                    document.body.appendChild(newScript);
-                });
-
-                // 各画面の初期化は各画面のJS（例: worklog.js）側の
-                // 自己実行ロジック（DOMContentLoaded / readyStateチェック）に任せる。
-
-                pageDiv = document.getElementById(pageId);
-
-                if (!pageDiv) {
+                } catch (err) {
                     pageDiv = document.createElement('div');
                     pageDiv.id = pageId;
                     pageDiv.className = 'page';
-                    pageDiv.innerHTML = `<p>内容が見つかりませんでした</p>`;
+                    pageDiv.innerHTML = `<p>読み込みに失敗しました（${err.message}）</p>`;
                     container.appendChild(pageDiv);
                 }
-            } catch (err) {
+            } else {
                 pageDiv = document.createElement('div');
                 pageDiv.id = pageId;
                 pageDiv.className = 'page';
-                pageDiv.innerHTML = `<p>読み込みに失敗しました（${err.message}）</p>`;
+                pageDiv.innerHTML = `<p>${displayTitle}画面は準備中です</p>`;
                 container.appendChild(pageDiv);
             }
-        } else {
-            pageDiv = document.createElement('div');
-            pageDiv.id = pageId;
-            pageDiv.className = 'page';
-            pageDiv.innerHTML = `<p>画面は準備中です</p>`;
-            container.appendChild(pageDiv);
         }
+
+        // タブボタンを新規作成
+        const newTab = document.createElement('button');
+        newTab.className = 'tab-item';
+        newTab.id = `tab-btn-${pageId}`;
+        newTab.innerHTML = `${displayTitle} <span class="tab-close-btn" onclick="event.stopPropagation(); closeTab('${pageId}')">×</span>`;
+        newTab.onclick = () => switchTab(pageId);
+        if (tabBar) tabBar.appendChild(newTab);
     }
 
-    // タブバーは使わず、常に1画面だけを表示する
+    switchTab(pageId);
+}
+
+// タブ切り替え関数
+function switchTab(pageId) {
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-    pageDiv.classList.add('active');
+    document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) targetPage.classList.add('active');
+
+    const targetTab = document.getElementById(`tab-btn-${pageId}`) || document.querySelector('.tab-bar .tab-item:first-child');
+    if (targetTab) targetTab.classList.add('active');
+
+    if (tabHistory[tabHistory.length - 1] !== pageId) {
+        tabHistory.push(pageId);
+    }
+}
+
+// タブを閉じる関数（直前に見ていたタブに戻る：tabHistory方式）
+function closeTab(pageId) {
+    const tabBtn = document.getElementById(`tab-btn-${pageId}`);
+    if (tabBtn) tabBtn.remove();
+
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) targetPage.remove();
+
+    tabHistory = tabHistory.filter(id => id !== pageId);
+
+    const previousTab = tabHistory.length > 0 ? tabHistory[tabHistory.length - 1] : 'main-page';
+
+    if (document.getElementById(previousTab)) {
+        switchTab(previousTab);
+    } else {
+        switchTab('main-page');
+    }
 }
 
 // ------------------------------------------------------------
 // 既存のHTMLボタン要素に対するイベントリスナーの紐付けと属性の設定
 // ------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-    // 画面遷移ターゲットの定義マップ
+    // ホームタブ（main-page）のクリックイベント
+    // ※HTMLに静的に書かれているため、他のタブと違いopenTab経由で
+    //   イベントが付与されないので、ここで個別に紐付ける
+    const homeTab = document.getElementById('tab-btn-main-page');
+    if (homeTab) {
+        homeTab.addEventListener('click', () => switchTab('main-page'));
+    }
+
+    // 画面遷移ターゲットとタイトルの定義マップ
     const buttonConfig = {
-        '連絡事項': { target: 'worklog-page' },
-        '機器台帳': { target: 'ledger-page' }
+        '連絡事項': { target: 'worklog-page', title: '📋連絡事項一覧' },
+        '機器台帳': { target: 'ledger-page', title: '機器台帳' }
     };
 
     // main-btn-group および sub-btn-group 内のすべてのボタンを取得
@@ -143,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 設定マップに存在するボタンには dataset 属性を付与
         if (buttonConfig[label]) {
             btn.dataset.target = buttonConfig[label].target;
+            btn.dataset.title = buttonConfig[label].title;
         }
 
         // クリックイベントのリスナーを設定

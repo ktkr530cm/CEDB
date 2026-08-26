@@ -1,13 +1,3 @@
-.record-table th,
-.record-table td {
-    border: 1px solid #bdc3c7;
-    padding: 10px 8px;
-    text-align: center;   /* left → center に変更 */
-    vertical-align: middle;
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
 .record-table th:nth-child(1),
 .record-table td:nth-child(1) { width: 85px; }   /* 日付 */
 
@@ -231,7 +221,7 @@ body {
 .record-table td {
     border: 1px solid #bdc3c7;
     padding: 10px 8px;
-    text-align: left;
+    text-align: center; 
     vertical-align: middle;
     white-space: pre-wrap;
     word-break: break-word;

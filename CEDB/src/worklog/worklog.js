@@ -5,14 +5,13 @@ const staffList = ["笹岡", "野村", "下平", "高橋", "阿部", "北原", "
 const STORAGE_KEY = 'worklog_data_list';
 
 // --- タブ（画面）切替関数 ---
-// ※ main.js側のグローバル関数 openTab と名前が衝突しないよう switchWorklogTab に統一
-function switchWorklogTab(pageId) {
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-    });
-    const targetPage = document.getElementById(pageId);
-    if (targetPage) {
-        targetPage.classList.add('active');
+function switchWorklogTab(pageId, title) {
+    if (typeof window.openTab === 'function') {
+        window.openTab(pageId, title);
+    } else {
+        document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+        const targetPage = document.getElementById(pageId);
+        if (targetPage) targetPage.classList.add('active');
     }
 }
 
@@ -98,7 +97,8 @@ function editWorklog(id, date, category, priority, author, details) {
 
     if (formTitle) formTitle.textContent = id ? "連絡事項 編集" : "連絡事項 新規登録";
 
-    switchWorklogTab('worklog-form-page');
+    const titleText = id ? "📝連絡事項 編集" : "📝連絡事項 新規登録";
+          switchWorklogTab('worklog-form-page', titleText);
 }
 
 // --- フォームリセット処理 ---

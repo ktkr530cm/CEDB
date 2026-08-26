@@ -78,3 +78,27 @@ body {
         background: #e74c3c;
     }
 
+/* --- タブ切り替え時のボタンデザイン崩れ防止 --- */
+.toolbar .btn,
+.record-table-container .btn,
+#main-content button,
+.tab-content button {
+    background-color: #3498db !important; /* 青色に固定 */
+    color: #ffffff !important;
+    height: 38px !important;              /* 高さを固定 */
+    padding: 0 16px !important;
+    border: none !important;
+    border-radius: 4px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+}
+
+/* ホバー（マウスを乗せたとき）の青色 */
+.toolbar .btn:hover,
+.record-table-container .btn:hover,
+#main-content button:hover,
+.tab-content button:hover {
+    background-color: #2980b9 !important; /* 濃い青色 */
+}
