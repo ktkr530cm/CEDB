@@ -1,286 +1,217 @@
-<!-- 1. 機器台帳 一覧画面 -->
-<div id="ledger-page" class="page">
-    <div style="display: flex; gap: 20px; align-items: flex-start; width: 100%;">
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>機器台帳</title>
+    <link rel="stylesheet" href="ledger.css">
+</head>
+<body>
 
-  
-<!-- 左サイドバー（共通操作パネル） -->
-<aside class="ledger-sidebar">
-    <h2 style="font-size: 18px; margin: 0; padding-bottom: 8px; border-bottom: 2px solid #3498db; color: #2c3e50;">機器台帳 メニュー</h2>
-    
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button class="btn" style="width: 100%; padding: 10px; font-size: 14px;" onclick="openNewLedgerForm()">＋ 新規登録</button>
-    </div>
+    <!-- 1. 機器台帳 一覧画面 -->
+    <div id="ledger-page" class="page">
+        <div class="ledger-container">
 
-    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 0;">
+            <!-- 左サイドバー（共通操作パネル） -->
+            <aside class="ledger-sidebar">
+                <h2>機器台帳 メニュー</h2>
+                
+                <div>
+                    <button class="btn" onclick="openNewLedgerForm()">＋ 新規登録</button>
+                </div>
 
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-        <label style="font-weight: bold; font-size: 13px; color: #475569;">絞り込み検索</label>
-        <input type="text" id="ledger-search-input" placeholder="CE番号・機種名等..."
-               style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; box-sizing: border-box;"
-               onkeydown="if(event.key === 'Enter') searchLedger();">
-        <div style="display: flex; gap: 6px;">
-            <button class="btn" style="flex: 1; padding: 8px; font-size: 13px; background-color: #3498db;" onclick="searchLedger()">🔍 検索</button>
-            <button class="btn-sub" style="flex: 1; padding: 8px; font-size: 13px;" onclick="clearLedgerSearch()">クリア</button>
+                <hr>
+
+                <div>
+                    <label>絞り込み検索</label>
+                    <input type="text" id="ledger-search-input" placeholder="CE番号・機種名等..." onkeydown="if(event.key === 'Enter') searchLedger();">
+                    <div>
+                        <button class="btn" onclick="searchLedger()">🔍 検索</button>
+                        <button class="btn-sub" onclick="clearLedgerSearch()">クリア</button>
+                    </div>
+                </div>
+
+                <hr>
+
+                <button class="btn-sub" onclick="resetLedgerColumnOrder()" title="列の並び順を初期状態に戻します">↺ 列順リセット</button>
+            </aside>
+
+            <!-- 右側メインエリア：一覧テーブル -->
+            <main>
+                <div>
+                    <table class="record-table">
+                        <thead>
+                            <tr id="ledger-table-head-row">
+                                <!-- 列ヘッダーはJSで動的生成 -->
+                            </tr>
+                        </thead>
+                        <tbody id="ledger-table-body"></tbody>
+                    </table>
+                </div>
+            </main>
         </div>
     </div>
 
-    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 0;">
+    <!-- 2. 機器台帳 入力画面(単票フォーム) -->
+    <div id="ledger-form-page" class="page">
+        <div class="ledger-container">
 
-    <button class="btn-sub" style="width: 100%; padding: 8px; font-size: 12px;" onclick="resetLedgerColumnOrder()" title="列の並び順を初期状態に戻します">↺ 列順リセット</button>
-</aside>
+            <!-- 左サイドバー（操作・アクション用） -->
+            <aside class="ledger-sidebar">
+                <h2>機器台帳 メニュー</h2>
+                
+                <!-- 保存・キャンセルボタン -->
+                <div>
+                    <button type="submit" form="ledger-form" class="btn">💾 保存</button>
+                    <button type="button" class="btn-sub" onclick="cancelLedgerForm()">キャンセル</button>
+                </div>
 
-        <!-- 右側メインエリア：一覧テーブル -->
-        <main style="flex: 1; min-width: 0;">
-            <div style="overflow-x: auto;">
-                <table class="record-table" style="width: 100%;">
-                    <thead>
-                        <tr id="ledger-table-head-row">
-                            <!-- 列ヘッダーはJSで動的生成 -->
-                        </tr>
-                    </thead>
-                    <tbody id="ledger-table-body"></tbody>
-                </table>
-            </div>
-        </main>
-    </div>
-</div>
+                <hr>
 
+                <button type="button" class="btn-sub" onclick="cancelLedgerForm()">← 一覧に戻る</button>
+            </aside>
 
-<!-- 2. 機器台帳 入力画面(単票フォーム) -->
-<div id="ledger-form-page" class="page">
-    <div style="display: flex; gap: 20px; align-items: flex-start; width: 100%;">
+            <!-- 右側メインエリア：入力フォーム -->
+            <main>
+                <div>
+                    <h2 id="form-title">機器台帳 登録・編集</h2>
+                </div>
 
-       <!-- 左サイドバー（操作・アクション用） -->
-<aside class="ledger-sidebar">
-    <h2 style="font-size: 18px; margin: 0; padding-bottom: 8px; border-bottom: 2px solid #3498db; color: #2c3e50;">機器台帳 メニュー</h2>
-    
-    <!-- 保存・キャンセルボタン -->
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button type="submit" form="ledger-form" class="btn" style="width: 100%; padding: 10px; font-size: 14px;">💾 保存</button>
-        <button type="button" class="btn-sub" style="width: 100%; padding: 10px; font-size: 14px;" onclick="cancelLedgerForm()">キャンセル</button>
-    </div>
+                <form id="ledger-form" class="single-record-form" onsubmit="event.preventDefault(); saveLedger();">
+                    <input type="hidden" id="ledger-id">
 
-    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 0;">
+                    <h3 class="form-section-title">基本情報</h3>
+                    <div class="form-grid">
+                        <div class="form-group col-span-2">
+                            <label>機器画像</label>
+                            <div id="device-image-wrap">
+                                <img id="device-image" src="" alt="機器画像">
+                                <div id="device-image-placeholder">機種名を入力すると画像を表示します</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ce-number">CE番号 <span class="required">*</span></label>
+                            <input type="text" id="ce-number" placeholder="例: CE-00123" required>
+                        </div>
 
-    <button type="button" class="btn-sub" style="width: 100%; padding: 8px; font-size: 13px;" onclick="cancelLedgerForm()">← 一覧に戻る</button>
-</aside>
+                        <div class="form-group">
+                            <label for="operating-status">稼働状況</label>
+                            <select id="operating-status">
+                                <option value="稼働">稼働</option>
+                                <option value="廃棄待ち">廃棄待ち</option>
+                                <option value="廃棄">廃棄</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="device-category">機器分類</label>
+                            <select id="device-category">
+                                <option value="">選択してください</option>
+                                <option value="生体情報モニタ">生体情報モニタ</option>
+                                <option value="送信機">送信機</option>
+                                <option value="輸液ポンプ">輸液ポンプ</option>
+                                <option value="シリンジポンプ">シリンジポンプ</option>
+                                <option value="人工呼吸器">人工呼吸器</option>
+                                <option value="フットポンプ">フットポンプ</option>
+                                <option value="除細動器">除細動器</option>
+                                <option value="その他">その他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="model-name">機種名 <span class="required">*</span></label>
+                            <input type="text" id="model-name" placeholder="例: ○○○○-100" required oninput="updateDeviceImagePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label for="manufacturer">メーカー</label>
+                            <select id="manufacturer">
+                                <option value="">選択してください</option>
+                                <option value="日本光電">日本光電</option>
+                                <option value="フクダ電子">フクダ電子</option>
+                                <option value="コヴィディエン">コヴィディエン</option>
+                                <option value="東レ">東レ</option>
+                                <option value="アトム">アトム</option>
+                                <option value="トーイツ">トーイツ</option>
+                                <option value="テルモ">テルモ</option>
+                                <option value="その他">その他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dept">部署</label>
+                            <input type="text" id="dept" placeholder="例: ICU">
+                        </div>
+                        <div class="form-group">
+                            <label for="location">配置場所</label>
+                            <input type="text" id="location" placeholder="例: 3階病棟">
+                        </div>
+                        
+                    </div>
 
-        <!-- 右側メインエリア：入力フォーム -->
-        <main style="flex: 1; min-width: 0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 id="form-title" style="margin: 0;">機器台帳 登録・編集</h2>
-            </div>
-
-            <form id="ledger-form" class="single-record-form" onsubmit="event.preventDefault(); saveLedger();">
-                <input type="hidden" id="ledger-id">
-
-                <h3 class="form-section-title">基本情報</h3>
-                <div class="form-grid">
-                    <div class="form-group col-span-2" style="text-align: center;">
-                        <label>機器画像</label>
-                        <div id="device-image-wrap" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0;">
-                            <img id="device-image" src="" alt="機器画像" style="max-width: 220px; max-height: 220px; object-fit: contain; border: 1px solid #ccc; border-radius: 6px; display: none; background: #fff;">
-                            <div id="device-image-placeholder" style="color: #999; font-size: 13px;">機種名を入力すると画像を表示します</div>
+                    <h3 class="form-section-title">識別情報</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="serial-number">シリアル番号</label>
+                            <input type="text" id="serial-number" placeholder="例: SN-000123">
+                        </div>
+                        <div class="form-group">
+                            <label for="asset-number">資産番号</label>
+                            <input type="text" id="asset-number" placeholder="例: A-000123">
+                        </div>
+                        <div class="form-group">
+                            <label for="ch-number">CH番号</label>
+                            <input type="text" id="ch-number" placeholder="例: CH-001">
+                        </div>
+                        <div class="form-group">
+                            <label for="barcode">バーコード</label>
+                            <input type="text" id="barcode" placeholder="バーコード番号">
+                        </div>
+                        <div class="form-group">
+                            <label for="gs1-128">GS1-128</label>
+                            <input type="text" id="gs1-128" placeholder="GS1-128コード">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="ce-number">CE番号 <span class="required">*</span></label>
-                        <input type="text" id="ce-number" placeholder="例: CE-00123" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="device-category">機器分類</label>
-                        <select id="device-category">
-                            <option value="">選択してください</option>
-                            <option value="生体情報モニタ">生体情報モニタ</option>
-                            <option value="送信機">送信機</option>
-                            <option value="輸液ポンプ">輸液ポンプ</option>
-                            <option value="シリンジポンプ">シリンジポンプ</option>
-                            <option value="人工呼吸器">人工呼吸器</option>
-                            <option value="フットポンプ">フットポンプ</option>
-                            <option value="除細動器">除細動器</option>
-                            <option value="その他">その他</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="model-name">機種名 <span class="required">*</span></label>
-                        <input type="text" id="model-name" placeholder="例: ○○○○-100" required oninput="updateDeviceImagePreview()">
-                    </div>
-                    <div class="form-group">
-                        <label for="manufacturer">メーカー</label>
-                        <select id="manufacturer">
-                            <option value="">選択してください</option>
-                            <option value="日本光電">日本光電</option>
-                            <option value="フクダ電子">フクダ電子</option>
-                            <option value="コヴィディエン">コヴィディエン</option>
-                            <option value="東レ">東レ</option>
-                            <option value="アトム">アトム</option>
-                            <option value="トーイツ">トーイツ</option>
-                            <option value="テルモ">テルモ</option>
-                            <option value="その他">その他</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="dept">部署</label>
-                        <input type="text" id="dept" placeholder="例: ICU">
-                    </div>
-                    <div class="form-group">
-                        <label for="location">配置場所</label>
-                        <input type="text" id="location" placeholder="例: 3階病棟">
-                    </div>
-                    <div class="form-group">
-                        <label for="operating-status">稼働状況</label>
-                        <select id="operating-status">
-                            <option value="稼働">稼働</option>
-                            <option value="廃棄待ち">廃棄待ち</option>
-                            <option value="廃棄">廃棄</option>
-                        </select>
-                    </div>
-                </div>
 
-                <h3 class="form-section-title">識別情報</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="serial-number">シリアル番号</label>
-                        <input type="text" id="serial-number" placeholder="例: SN-000123">
+                    <h3 class="form-section-title">搬入情報</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="reg-date">登録日</label>
+                            <input type="date" id="reg-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="delivery-staff">搬入担当者</label>
+                            <input type="text" id="delivery-staff" placeholder="担当者名">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="asset-number">資産番号</label>
-                        <input type="text" id="asset-number" placeholder="例: A-000123">
-                    </div>
-                    <div class="form-group">
-                        <label for="ch-number">CH番号</label>
-                        <input type="text" id="ch-number" placeholder="例: CH-001">
-                    </div>
-                    <div class="form-group">
-                        <label for="barcode">バーコード</label>
-                        <input type="text" id="barcode" placeholder="バーコード番号">
-                    </div>
-                    <div class="form-group">
-                        <label for="gs1-128">GS1-128</label>
-                        <input type="text" id="gs1-128" placeholder="GS1-128コード">
-                    </div>
-                </div>
 
-                <h3 class="form-section-title">搬入情報</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="reg-date">登録日</label>
-                        <input type="date" id="reg-date">
+                    <h3 class="form-section-title">保守情報</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="maint-status">保守状況</label>
+                            <select id="maint-status">
+                                <option value="保守継続">保守継続</option>
+                                <option value="保守終了">保守終了</option>
+                                <option value="院内対応">院内対応</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="repair-contact">修理連絡先</label>
+                            <input type="text" id="repair-contact" placeholder="連絡先(電話番号等)">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="delivery-staff">搬入担当者</label>
-                        <input type="text" id="delivery-staff" placeholder="担当者名">
-                    </div>
-                </div>
 
-                <h3 class="form-section-title">保守情報</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="maint-status">保守状況</label>
-                        <select id="maint-status">
-                            <option value="保守継続">保守継続</option>
-                            <option value="保守終了">保守終了</option>
-                            <option value="院内対応">院内対応</option>
-                        </select>
+                    <h3 class="form-section-title">備考</h3>
+                    <div class="form-grid">
+                        <div class="form-group col-span-2">
+                            <label for="remarks">備考</label>
+                            <textarea id="remarks" rows="4" placeholder="特記事項があれば入力してください"></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="repair-contact">修理連絡先</label>
-                        <input type="text" id="repair-contact" placeholder="連絡先(電話番号等)">
-                    </div>
-                </div>
-
-                <h3 class="form-section-title">備考</h3>
-                <div class="form-grid">
-                    <div class="form-group col-span-2">
-                        <label for="remarks">備考</label>
-                        <textarea id="remarks" rows="4" placeholder="特記事項があれば入力してください"></textarea>
-                    </div>
-                </div>
-
-                
-            </form>
-        </main>
+                </form>
+            </main>
+        </div>
     </div>
-</div>
 
-<style>
-    /* フォーム用 グリッドレイアウト */
-    .form-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px 20px;
-    }
-    .form-group.col-span-2 {
-        grid-column: 1 / -1;
-    }
-    @media (max-width: 700px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-    }
+<!-- JavaScriptの読み込み -->
+<script src="ledger.js"></script>
 
-    /* 列のドラッグ＆ドロップ用スタイル */
-    .record-table th.draggable-col {
-        cursor: grab;
-        user-select: none;
-    }
-    .record-table th.draggable-col:active {
-        cursor: grabbing;
-    }
-    .record-table th.col-dragging {
-        opacity: 0.4;
-    }
-    .record-table th.col-drag-over {
-        border-left: 3px solid #3498db;
-    }
-
-    /* サイドバーの画面固定設定 */
-aside.ledger-sidebar {
-    width: 260px;
-    flex-shrink: 0;
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    
-    /* 追従・固定表示用の追加プロパティ */
-    position: sticky;
-    top: 20px; /* 画面上部からの余白 */
-    max-height: calc(100vh - 40px); /* 画面の高さを超えた場合に内部スクロール */
-    overflow-y: auto;
-}
-
-/* フォーム用 グリッドレイアウト */
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px 20px;
-}
-.form-group.col-span-2 {
-    grid-column: 1 / -1;
-}
-@media (max-width: 700px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* 列のドラッグ＆ドロップ用スタイル */
-.record-table th.draggable-col {
-    cursor: grab;
-    user-select: none;
-}
-.record-table th.draggable-col:active {
-    cursor: grabbing;
-}
-.record-table th.col-dragging {
-    opacity: 0.4;
-}
-.record-table th.col-drag-over {
-    border-left: 3px solid #3498db;
-}
-</style>
+</body>
+</html>

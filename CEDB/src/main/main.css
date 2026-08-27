@@ -1,3 +1,6 @@
+/* 修正後：#worklog-page 内の要素にしか効かないようにする */
+
+
 html {
     margin: 0;
     padding: 0;
@@ -10,6 +13,10 @@ body {
     padding: 0;
 }
 
+/* ------------------------------------------------------------
+   全画面共通パーツ（ヘッダー、タブバー、全体レイアウト）
+   ------------------------------------------------------------ */
+
 /* ヘッダー */
 .app-header {
     background-color: #02104E;
@@ -17,11 +24,11 @@ body {
     padding: 15px 30px;
 }
 
-    .app-header h1 {
-        margin: 0;
-        font-size: 32px;
-        font-weight: bold;
-    }
+.app-header h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: bold;
+}
 
 /* タブバー */
 .tab-bar {
@@ -48,14 +55,14 @@ body {
     transition: background-color 0.2s;
 }
 
-    .tab-item:hover {
-        background-color: #b7c1cd;
-    }
+.tab-item:hover {
+    background-color: #b7c1cd;
+}
 
-    .tab-item.active {
-        background-color: white;
-        color: #02104E;
-    }
+.tab-item.active {
+    background-color: white;
+    color: #02104E;
+}
 
 .tab-close-btn {
     color: #7f8c8d;
@@ -64,13 +71,13 @@ body {
     cursor: pointer;
 }
 
-    .tab-close-btn:hover {
-        color: #e74c3c;
-    }
+.tab-close-btn:hover {
+    color: #e74c3c;
+}
 
 /* メインコンテナ・ページ構造 */
 .container {
-    max-width: 98% ;
+    max-width: 98%;
     width: 100%;
     margin: 0 auto;
     padding: 5px;
@@ -84,19 +91,24 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-    .page.active {
-        display: block ;
-    }
+.page.active {
+    display: block;
+}
 
-/* メインメニューボタン群 */
-.main-btn-group {
+
+/* ------------------------------------------------------------
+   メイン画面（#main-page）専用のスタイル
+   ※他画面（連絡事項や機器台帳）にボタンデザインが漏れないよう限定
+   ------------------------------------------------------------ */
+
+#main-page .main-btn-group {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     margin-top: 2px;
 }
 
-.btn {
+#main-page .btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -114,15 +126,15 @@ body {
     transition: background-color 0.2s, transform 0.1s;
 }
 
-    .btn:hover {
-        background-color: #2980b9;
-    }
+#main-page .btn:hover {
+    background-color: #2980b9;
+}
 
-    .btn:active {
-        transform: scale(0.98);
-    }
+#main-page .btn:active {
+    transform: scale(0.98);
+}
 
-.sub-btn-group {
+#main-page .sub-btn-group {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
@@ -130,7 +142,7 @@ body {
     margin-bottom: 10px;
 }
 
-.btn-sub {
+#main-page .btn-sub {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -143,8 +155,10 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.1s;
+    line-height: normal;   /* ★追加：worklog.cssのline-height:1の漏れを防ぐ */
+    margin-left: 0;        /* ★追加：念のため明示 */
 }
 
-    .btn-sub:hover {
-        background-color: #cbd5e1;
-    }
+#main-page .btn-sub:hover {
+    background-color: #cbd5e1;
+}

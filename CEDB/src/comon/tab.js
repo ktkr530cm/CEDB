@@ -12,10 +12,10 @@ let tabHistory = ['main-page'];
 
 // pageIdからデフォルトのタブタイトルを割り当てる（tabTitle省略時のフォールバック）
 const defaultTabTitles = {
-    'worklog-page': '📋連絡事項一覧',
+    'worklog-page': '🖊️連絡事項一覧',
     'worklog-form-page': '📝連絡事項入力',
-    'past-worklog-page': '過去アーカイブ',
-    'ledger-page': '機器台帳'
+    'past-worklog-page': '📜過去アーカイブ',
+    'ledger-page': '📒機器台帳'
 };
 
 // メイン画面のボタンクリック時のハンドラー関数
@@ -53,7 +53,7 @@ function loadPageStyles(fetchedDoc, pagePath, pageId) {
     });
 }
 
-// タブを切り替え＆他画面のCSSを無効化
+// タブ切り替え関数
 function switchTab(pageId) {
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
@@ -64,12 +64,16 @@ function switchTab(pageId) {
     const targetTab = document.getElementById(`tab-btn-${pageId}`) || document.querySelector('.tab-bar .tab-item:first-child');
     if (targetTab) targetTab.classList.add('active');
 
-    // ★重要: 非表示画面のCSSを無効化（disabled）してメイン画面への干渉を防ぐ
+    // ★修正: 動的に追加された特定画面のCSSのみを制御する
     document.querySelectorAll('link[data-owner-page]').forEach(link => {
-        if (link.dataset.ownerPage === pageId) {
-            link.disabled = false; // アクティブ画面のCSSのみ有効
+        const owner = link.dataset.ownerPage;
+        
+        // 該当の画面を開いている時のみ、その画面専用CSSを有効化
+        if (owner === pageId) {
+            link.disabled = false;
         } else {
-            link.disabled = true;  // 非アクティブ画面のCSSは無効
+            // 他の画面用CSSはオフにする（干渉防止）
+            link.disabled = true;
         }
     });
 
@@ -103,7 +107,6 @@ async function openTab(pageId, tabTitle) {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
 
-                // ★重要: pageId を渡して読み込み元を識別させる
                 loadPageStyles(doc, path, pageId);
 
                 const scriptEls = [];
@@ -117,26 +120,40 @@ async function openTab(pageId, tabTitle) {
 
                 container.appendChild(pageDiv);
 
+                // ★外部スクリプト（ledger.js）の読み込み完了を正しく待つ処理
                 const scriptBaseUrl = new URL(path, document.baseURI);
+                const scriptPromises = [];
+
                 scriptEls.forEach(oldScript => {
                     const newScript = document.createElement('script');
                     Array.from(oldScript.attributes).forEach(attr => {
                         newScript.setAttribute(attr.name, attr.value);
                     });
+
                     if (oldScript.hasAttribute('src')) {
-                        newScript.src = new URL(oldScript.getAttribute('src'), scriptBaseUrl).href;
+                        const scriptUrl = new URL(oldScript.getAttribute('src'), scriptBaseUrl).href;
+                        newScript.src = scriptUrl;
+
+                        // スクリプトの読み込み完了をPromiseで監視
+                        const p = new Promise((resolve) => {
+                            newScript.onload = resolve;
+                            newScript.onerror = resolve;
+                        });
+                        scriptPromises.push(p);
                     } else {
                         newScript.textContent = oldScript.textContent;
                     }
                     document.body.appendChild(newScript);
                 });
 
+                // すべてのスクリプト（ledger.js）が読み込まれて実行されるまで待つ
+                await Promise.all(scriptPromises);
+
             } catch (err) {
                 pageDiv.innerHTML = `<p>読み込みに失敗しました（${err.message}）</p>`;
                 container.appendChild(pageDiv);
             }
         } 
-        // HTML内に元々存在する要素、あるいは定義なし画面の場合
         else if (!pageDiv) {
             const container = document.getElementById('main-container');
             pageDiv = document.createElement('div');
@@ -155,7 +172,17 @@ async function openTab(pageId, tabTitle) {
         if (tabBar) tabBar.appendChild(newTab);
     }
 
+    // タブ切り替え表示
     switchTab(pageId);
+
+    // ★画面切り替え完了後に、機器台帳の初期化・再描画を実行
+    if (pageId === 'ledger-page' || pageId === 'ledger-form-page') {
+        if (typeof initLedger === 'function') {
+            initLedger();
+        } else if (typeof renderLedgerTable === 'function') {
+            renderLedgerTable();
+        }
+    }
 }
 
 // グローバル関数として開示（worklog.js等から呼び出せるようにする）
@@ -188,7 +215,7 @@ function closeTab(pageId) {
 document.addEventListener('DOMContentLoaded', () => {
     const buttonConfig = {
         '連絡事項': { target: 'worklog-page', title: '📋連絡事項一覧' },
-        '機器台帳': { target: 'ledger-page', title: '機器台帳' }
+        '機器台帳': { target: 'ledger-page', title: '📒機器台帳' }
     };
 
     const buttons = document.querySelectorAll('.main-btn-group button, .sub-btn-group button');
@@ -205,28 +232,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// 例：タブ移動時にボタンを再描画・生成している処理
-function renderToolbar() {
-    const toolbar = document.getElementById('toolbar');
-    
-    // ボタンのHTMLを生成する際、'btn btn-primary' を確実に指定する
-    toolbar.innerHTML = `
-        <button type="button" class="btn btn-primary" id="add-btn">追加</button>
-        <button type="button" class="btn btn-primary" id="export-btn">出力</button>
-    `;
-}
-
-// または DOM要素を動的に作成している場合
-function createButton(text) {
-    const button = document.createElement('button');
-    button.textContent = text;
-    
-    // 1. 正しいクラス名を付与する (青色ボタン: btn-primary)
-    button.className = 'btn btn-primary'; 
-    
-    // 2. もし動的に style (height や background) が直接入っている場合はクリアする
-    button.style.height = '';
-    button.style.backgroundColor = '';
-    
-    return button;
-}

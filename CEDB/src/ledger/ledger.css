@@ -1,10 +1,138 @@
+/* --- ページ全体の背景色とスクロール防止 --- */
+html, body {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* ページ全体の不要なスクロールをオフにし1画面に収める */
+    background-color: #f8f9fa; /* 背景色を全体で統一 */
+}
+
+/* --- レイアウト全体（横並び設定） --- */
+.ledger-container {
+    display: flex;
+    gap: 20px;
+    align-items: stretch; /* 高さ上限を親に合わせる */
+    width: 100vw;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+
+/* --- 左サイドバー（位置固定） --- */
+.ledger-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    height: 100%;
+    overflow-y: auto; /* サイドバー内の項目が多い場合のみ内部で縦スクロール */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ledger-sidebar h2 {
+    font-size: 18px;
+    margin: 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #3498db;
+    color: #2c3e50;
+}
+
+.ledger-sidebar hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 5px 0;
+}
+
+/* --- メインエリア --- */
+main {
+    flex: 1;
+    min-width: 0;        /* flexの子要素が潰れるのを防ぎスクロールを発生させる */
+    height: 100%;        /* 親要素の高さに合わせる */
+    max-height: 100%;    /* ★高さの超過を防止 */
+    overflow: auto;      /* ★右側エリアだけで縦・横スクロールを可能にする */
+    background-color: #ffffff; /* メイン領域の背景色 */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+/* --- ボタン共通 --- */
+.btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn-sub {
+    background-color: #bcbec0;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn:hover, .btn-sub:hover {
+    opacity: 0.9;
+}
+
+/* --- テーブル（一覧画面） --- */
+.record-table {
+    width: max-content;  /* ★必須: 内容に応じて横幅を拡張させる */
+    min-width: 100%;
+    border-collapse: collapse;
+}
+
+.record-table th, .record-table td {
+    border: 1px solid #dee2e6;
+    padding: 8px;
+    text-align: left;
+    white-space: nowrap;               /* 文字が縦に折りたたまれるのを防止 */
+    min-width: 100px;                  /* 各列の最小幅 */
+}
+
+/* --- 画像プレースホルダー --- */
+#device-image-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 0;
+}
+
+#device-image {
+    max-width: 220px;
+    max-height: 220px;
+    object-fit: contain;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    display: none;
+    background: #fff;
+}
+
+#device-image-placeholder {
+    color: #999;
+    font-size: 13px;
+}
+
 /* --- 単票フォーム全体のコンテナ --- */
 .single-record-form {
     background-color: #f8f9fa;
     padding: 25px 30px;
     border-radius: 8px;
     border: 1px solid #dee2e6;
-    max-width: 720px;      /* 単票としての横幅を統一 */
+    max-width: 720px;
     margin: 0 auto;
 }
 
@@ -21,52 +149,134 @@
     margin-top: 0;
 }
 
-/* --- 帳票(複数列)ではなく単票(1列)に変更 --- */
+/* --- フォームグリッド (2列) --- */
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);   /* 2列 */
+    grid-template-columns: repeat(2, 1fr);
     gap: 15px 20px;
     margin-bottom: 10px;
 }
 
+/* --- フォームの項目（ラベルと入力欄）を横並びにする --- */
 .form-group {
     display: flex;
-    flex-direction: column;
-    margin-bottom: 14px;   /* 項目間の縦の間隔 */
+    flex-direction: row;       /* 上下並びから横並びに変更 */
+    align-items: center;       /* 上下中央揃え */
+    margin-bottom: 14px;
 }
 
-    .form-group label {
-        font-size: 13px;
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: #495057;
-    }
+/* ラベル（フィールド名）の固定幅とスタイル */
+.form-group label {
+    width: 130px;              /* 先頭ラベルの幅を固定して揃える */
+    flex-shrink: 0;            /* 幅が縮まないように保護 */
+    font-size: 13px;
+    font-weight: bold;
+    color: #495057;
+    margin-bottom: 0;          /* 横並び用に下の余白をリセット */
+    margin-right: 10px;        /* 入力欄との間の余白 */
+    text-align: right;         /* ラベル文字を右寄せにする場合（左寄せなら left ） */
+}
 
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        padding: 8px 10px;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        font-size: 14px;
-        width: 100%;         /* すべての入力欄が親要素幅=同じ幅になる */
-        box-sizing: border-box;
-    }
+/* 入力要素を残り幅いっぱいに広げる */
+.form-group input,
+.form-group select,
+.form-group textarea {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
 
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
+/* 画像プレースホルダー等の例外対応 */
+#device-image-wrap {
+    flex: 1;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
 
 .required {
     color: #dc3545;
     margin-left: 2px;
 }
 
-/* col-span-2 は単票化に伴い不要になったため削除、または以下で無効化 */
+/* --- 2列にまたがる要素の指定 --- */
 .col-span-2 {
-    grid-column: unset;
+    grid-column: span 2; /* unsetから修正 */
 }
+
+/* --- JS動的追加クラス対応 --- */
+
+/* 画像 / プレースホルダーの表示制御 */
+#device-image,
+#device-image-placeholder {
+    display: none;
+}
+#device-image.is-active,
+#device-image-placeholder.is-active {
+    display: block;
+}
+
+/* テーブル行・セル関連 */
+.clickable-row {
+    cursor: pointer;
+}
+.no-data {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+}
+
+/* 削除ボタン */
+.btn-delete {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    width: auto;
+}
+.btn-delete:hover {
+    background-color: #bd2130;
+}
+
+/* ヘッダー・ドラッグ＆ドロップ */
+.draggable-col {
+    cursor: grab;
+    user-select: none;
+}
+.col-dragging {
+    opacity: 0.4;
+    background-color: #e2e8f0;
+}
+.col-drag-over {
+    border-left: 3px solid #007bff;
+}
+
+/* 検索ボタン（青色） */
+.ledger-sidebar button[onclick="searchLedger()"] {
+    background-color: #3498db;
+    color: #fff;
+}
+.ledger-sidebar button[onclick="searchLedger()"]:hover {
+    background-color: #2980b9;
+}
+
+/* 新規登録ボタン（緑色） */
+.ledger-sidebar button[onclick="openNewLedgerForm()"] {
+    background-color: #2ecc71;
+    color: #fff;
+}
+.ledger-sidebar button[onclick="openNewLedgerForm()"]:hover {
+    background-color: #27ae60;
+}
+
