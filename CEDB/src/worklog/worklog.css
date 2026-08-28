@@ -1,22 +1,34 @@
-.record-table th:nth-child(1),
-.record-table td:nth-child(1) { width: 85px; }   /* 日付 */
+#worklog-page .record-table th:nth-child(1),
+#worklog-page .record-table td:nth-child(1),
+#past-worklog-page .record-table th:nth-child(1),
+#past-worklog-page .record-table td:nth-child(1){ width: 85px; }   /* 日付 */
 
-.record-table th:nth-child(2),
-.record-table td:nth-child(2) { width: 60px; }   /* 区分 */
+#worklog-page .record-table th:nth-child(2),
+#worklog-page .record-table td:nth-child(2),
+#past-worklog-page .record-table th:nth-child(2),
+#past-worklog-page .record-table td:nth-child(2){ width: 60px; }   /* 区分 */
 
-.record-table th:nth-child(3),
-.record-table td:nth-child(3) { width: 60px; }   /* 重要度 */
+#worklog-page .record-table th:nth-child(3),
+#worklog-page .record-table td:nth-child(3),
+#past-worklog-page .record-table th:nth-child(3),
+#past-worklog-page .record-table td:nth-child(3){ width: 60px; }   /* 重要度 */
 
-.record-table th:nth-child(4),
-.record-table td:nth-child(4) { width: 60px; }   /* 記入者 */
+#worklog-page .record-table th:nth-child(4),
+#worklog-page .record-table td:nth-child(4),
+#past-worklog-page .record-table th:nth-child(4),
+#past-worklog-page .record-table td:nth-child(4) { width: 60px; }   /* 記入者 */
 
 /* 5列目（連絡事項）は指定なし＝残りの幅を自動で埋める */
 
-.record-table th:nth-child(6),
-.record-table td:nth-child(6) { width: 250px; }  /* 確認状況 */
+#worklog-page .record-table th:nth-child(6),
+#worklog-page .record-table td:nth-child(6),
+#past-worklog-page .record-table th:nth-child(6),
+#past-worklog-page .record-table td:nth-child(6){ width: 250px; }  /* 確認状況 */
 
-.record-table th:nth-child(7),
-.record-table td:nth-child(7) { width: 60px; }  /* 操作 */
+#worklog-page .record-table th:nth-child(7),
+#worklog-page .record-table td:nth-child(7),
+#past-worklog-page .record-table th:nth-child(7),
+#past-worklog-page .record-table td:nth-child(7){ width: 60px; }  /* 操作 */
 　
 
 /* 全体基本スタイル */
@@ -44,7 +56,8 @@ body {
 }
 
 /* ボタン系 */
-.btn {
+#worklog-page .btn,
+#worklog-form-page .btn {
     display: inline-block;
     padding: 8px 16px;
     font-size: 14px;
@@ -62,7 +75,8 @@ body {
     opacity: 0.85;
 }
 
-.btn-sub {
+#worklog-page .btn-sub,
+#worklog-form-page .btn-sub {
     background-color: #7f8c8d;
     margin-left: 0px;
     padding: 3px 12px;
@@ -71,11 +85,11 @@ body {
 }
 
 
-.btn-save {
+#worklog-form-page .btn.btn-save {
     background-color: #2ecc71;
 }
 
-.btn-cancel {
+#worklog-form-page .btn.btn-cancel {
     background-color: #95a5a6;
 }
 
@@ -217,8 +231,10 @@ body {
     min-width: 0;
 }
 
-.record-table th,
-.record-table td {
+#worklog-page .record-table th,
+#worklog-page .record-table td,
+#past-worklog-page .record-table th,
+#past-worklog-page .record-table td {
     border: 1px solid #bdc3c7;
     padding: 10px 8px;
     text-align: center; 
@@ -227,13 +243,15 @@ body {
     word-break: break-word;
 }
 
-.record-table th {
+#worklog-page .record-table th,
+#past-worklog-page .record-table th {
     background-color: #e9ecef;
     font-weight: bold;
     color: #2c3e50;
 }
 
-.record-table tr:nth-child(even) {
+#worklog-page .record-table tr:nth-child(even),
+#past-worklog-page .record-table tr:nth-child(even) {
     background-color: #f8f9fa;
 }
 

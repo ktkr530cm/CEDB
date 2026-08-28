@@ -2,10 +2,6 @@
 // 画面切り替え制御（タブ表示版）
 // ------------------------------------------------------------
 // フォルダ構成: main フォルダと同じ階層に各画面フォルダを配置
-//
-// ※旧 tabs.js の機能（開く/切替/閉じる/履歴）をこのファイルに統合。
-//   さらに旧 app.js の改善点（fetchのキャッシュ無効化、
-//   スタイル/スクリプト読み込み時のタイムスタンプ付与）も維持しています。
 
 const pageRoutes = {
     'worklog-page': '../worklog/worklog.html',
@@ -17,10 +13,10 @@ let tabHistory = ['main-page'];
 
 // pageIdからデフォルトのタブタイトルを割り当てる（tabTitle省略時のフォールバック）
 const defaultTabTitles = {
-    'worklog-page': '📋連絡事項一覧',
+    'worklog-page': '🖊️連絡事項一覧',
     'worklog-form-page': '📝連絡事項入力',
-    'past-worklog-page': '過去アーカイブ',
-    'ledger-page': '機器台帳'
+    'past-worklog-page': '📜過去アーカイブ',
+    'ledger-page': '🧰機器台帳'
 };
 
 // メイン画面のボタンクリック時のハンドラー関数

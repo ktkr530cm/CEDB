@@ -31,10 +31,11 @@ function handleMenuClick(button) {
     }
 }
 
-// 外部CSSをロードし、所有画面IDを記録する
+// 外部CSSをロードし、読み込み完了を待てるようにする
 function loadPageStyles(fetchedDoc, pagePath, pageId) {
     const pageAbsoluteUrl = new URL(pagePath, document.baseURI);
     const links = fetchedDoc.querySelectorAll('link[rel="stylesheet"]');
+    const loadPromises = [];
 
     links.forEach(link => {
         const href = link.getAttribute('href');
@@ -42,41 +43,43 @@ function loadPageStyles(fetchedDoc, pagePath, pageId) {
 
         const resolvedHref = new URL(href, pageAbsoluteUrl).href;
 
+        // 既に読み込み済みのCSSであればスキップ
         if (document.querySelector(`link[data-loaded-href="${resolvedHref}"]`)) return;
 
         const newLink = document.createElement('link');
         newLink.rel = 'stylesheet';
         newLink.href = resolvedHref;
         newLink.dataset.loadedHref = resolvedHref;
-        newLink.dataset.ownerPage = pageId; // 画面判別用属性を追加
+
+        // ★読み込み完了(またはエラー)を待てるようPromise化
+        const p = new Promise((resolve) => {
+            newLink.onload = resolve;
+            newLink.onerror = resolve; // エラーでも処理を止めない
+        });
+        loadPromises.push(p);
+
         document.head.appendChild(newLink);
     });
+
+    return Promise.all(loadPromises);
 }
 
 // タブ切り替え関数
 function switchTab(pageId) {
+    // 1. 全画面と全タブから active クラスを外す
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
 
+    // 2. 該当する画面とタブに active クラスを付与
     const targetPage = document.getElementById(pageId);
     if (targetPage) targetPage.classList.add('active');
 
-    const targetTab = document.getElementById(`tab-btn-${pageId}`) || document.querySelector('.tab-bar .tab-item:first-child');
+    const targetTab = document.getElementById(`tab-btn-${pageId}`);
     if (targetTab) targetTab.classList.add('active');
 
-    // ★修正: 動的に追加された特定画面のCSSのみを制御する
-    document.querySelectorAll('link[data-owner-page]').forEach(link => {
-        const owner = link.dataset.ownerPage;
-        
-        // 該当の画面を開いている時のみ、その画面専用CSSを有効化
-        if (owner === pageId) {
-            link.disabled = false;
-        } else {
-            // 他の画面用CSSはオフにする（干渉防止）
-            link.disabled = true;
-        }
-    });
+    // ★CSSの disabled 切り替えロジックは全削除（常に有効化）★
 
+    // 履歴更新
     if (tabHistory[tabHistory.length - 1] !== pageId) {
         tabHistory.push(pageId);
     }
@@ -94,66 +97,65 @@ async function openTab(pageId, tabTitle) {
 
         // 外部ファイルロードが必要な場合
         if (path && !pageDiv) {
-            const container = document.getElementById('main-container');
-            pageDiv = document.createElement('div');
-            pageDiv.id = pageId;
-            pageDiv.className = 'page';
+    const container = document.getElementById('main-container');
 
-            try {
-                const res = await fetch(path);
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const html = await res.text();
+    try {
+        const res = await fetch(path);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const html = await res.text();
 
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
 
-                loadPageStyles(doc, path, pageId);
+        await loadPageStyles(doc, path, pageId);
 
-                const scriptEls = [];
-                Array.from(doc.body.children).forEach(child => {
-                    if (child.tagName === 'SCRIPT') {
-                        scriptEls.push(child);
-                    } else {
-                        pageDiv.appendChild(child.cloneNode(true));
-                    }
-                });
-
-                container.appendChild(pageDiv);
-
-                // ★外部スクリプト（ledger.js）の読み込み完了を正しく待つ処理
-                const scriptBaseUrl = new URL(path, document.baseURI);
-                const scriptPromises = [];
-
-                scriptEls.forEach(oldScript => {
-                    const newScript = document.createElement('script');
-                    Array.from(oldScript.attributes).forEach(attr => {
-                        newScript.setAttribute(attr.name, attr.value);
-                    });
-
-                    if (oldScript.hasAttribute('src')) {
-                        const scriptUrl = new URL(oldScript.getAttribute('src'), scriptBaseUrl).href;
-                        newScript.src = scriptUrl;
-
-                        // スクリプトの読み込み完了をPromiseで監視
-                        const p = new Promise((resolve) => {
-                            newScript.onload = resolve;
-                            newScript.onerror = resolve;
-                        });
-                        scriptPromises.push(p);
-                    } else {
-                        newScript.textContent = oldScript.textContent;
-                    }
-                    document.body.appendChild(newScript);
-                });
-
-                // すべてのスクリプト（ledger.js）が読み込まれて実行されるまで待つ
-                await Promise.all(scriptPromises);
-
-            } catch (err) {
-                pageDiv.innerHTML = `<p>読み込みに失敗しました（${err.message}）</p>`;
-                container.appendChild(pageDiv);
+        const scriptEls = [];
+        Array.from(doc.body.children).forEach(child => {
+            if (child.tagName === 'SCRIPT') {
+                scriptEls.push(child);
+            } else {
+                // ラッパーを作らず、元のidのままコンテナ直下に追加
+                container.appendChild(child.cloneNode(true));
             }
-        } 
+        });
+
+        pageDiv = document.getElementById(pageId);
+
+        const scriptBaseUrl = new URL(path, document.baseURI);
+        const scriptPromises = [];
+
+        scriptEls.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+
+            if (oldScript.hasAttribute('src')) {
+                const scriptUrl = new URL(oldScript.getAttribute('src'), scriptBaseUrl).href;
+                newScript.src = scriptUrl;
+                const p = new Promise((resolve) => {
+                    newScript.onload = resolve;
+                    newScript.onerror = resolve;
+                });
+                scriptPromises.push(p);
+            } else {
+                newScript.textContent = oldScript.textContent;
+            }
+            document.body.appendChild(newScript);
+        });
+
+        await Promise.all(scriptPromises);
+
+    } catch (err) {
+        if (!document.getElementById(pageId)) {
+            const errDiv = document.createElement('div');
+            errDiv.id = pageId;
+            errDiv.className = 'page';
+            errDiv.innerHTML = `<p>読み込みに失敗しました（${err.message}）</p>`;
+            container.appendChild(errDiv);
+        }
+    }
+}
         else if (!pageDiv) {
             const container = document.getElementById('main-container');
             pageDiv = document.createElement('div');

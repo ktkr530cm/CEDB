@@ -86,6 +86,18 @@ function getLedgerColumnOrder() {
     return LEDGER_COLUMN_KEYS.slice();
 }
 
+// --- 列の並び順を保存 ---
+function saveLedgerColumnOrder(order) {
+    localStorage.setItem(LEDGER_COLUMN_ORDER_KEY, JSON.stringify(order));
+}
+
+// --- 列の並び順をリセット（HTML側の「列順リセット」ボタンから呼ばれる） ---
+function resetLedgerColumnOrder() {
+    localStorage.removeItem(LEDGER_COLUMN_ORDER_KEY);
+    renderLedgerTableHeader();
+    renderLedgerTable();
+}
+
 let ledgerDragColumnKey = null;
 
 // --- ヘッダー行描画（ドラッグ&ドロップ対応） ---
@@ -163,51 +175,12 @@ function saveStoredLedgers(data) {
     localStorage.setItem(LEDGER_STORAGE_KEY, JSON.stringify(data));
 }
 
-// --- 新規登録フォームを開く ---
-function openNewLedgerForm() {
-    document.getElementById('ledger-form').reset();
-    document.getElementById('ledger-id').value = '';
-    document.getElementById('form-title').textContent = '機器台帳 新規登録';
-    updateDeviceImagePreview();
-    openTab('ledger-form-page', '📦 機器台帳登録');
-}
-
 function setFieldValue(id, value) {
     const el = document.getElementById(id);
     if (el) el.value = value;
 }
 
-// --- 編集フォームを開く ---
-function editLedger(id) {
-    const data = getStoredLedgers();
-    const item = data.find(d => d.id === id);
-    if (!item) return;
 
-    setFieldValue('ledger-id', item.id);
-    setFieldValue('ce-number', item.ceNumber || '');
-    setFieldValue('device-category', item.deviceCategory || '');
-    setFieldValue('model-name', item.modelName || '');
-    setFieldValue('manufacturer', item.manufacturer || '');
-    setFieldValue('dept', item.dept || '');
-    setFieldValue('location', item.location || '');
-    setFieldValue('operating-status', item.operatingStatus || '稼働');
-    setFieldValue('serial-number', item.serialNumber || '');
-    setFieldValue('asset-number', item.assetNumber || '');
-    setFieldValue('ch-number', item.chNumber || '');
-    setFieldValue('barcode', item.barcode || '');
-    setFieldValue('gs1-128', item.gs1 || '');
-    setFieldValue('reg-date', item.regDate || '');
-    setFieldValue('delivery-staff', item.deliveryStaff || '');
-    setFieldValue('maint-status', item.maintStatus || '契約あり');
-    setFieldValue('repair-contact', item.repairContact || '');
-    setFieldValue('disposal-date', item.disposalDate || '');
-    setFieldValue('disposal-staff', item.disposalStaff || '');
-    setFieldValue('remarks', item.remarks || '');
-
-    document.getElementById('form-title').textContent = '機器台帳 編集';
-    updateDeviceImagePreview();
-    openTab('ledger-form-page', '✏️ 機器台帳編集');
-}
 
 function cancelLedgerForm() {
     const formTab = document.getElementById('tab-btn-ledger-form-page');
@@ -269,6 +242,7 @@ function deleteLedger(id) {
 }
 
 // --- 一覧テーブル描画 ---
+// --- 一覧テーブル描画（カンマ区切り＝OR、スペース区切り＝AND対応） ---
 function renderLedgerTable(filterText) {
     if (filterText === undefined) filterText = '';
     const tbody = document.getElementById('ledger-table-body');
@@ -280,13 +254,30 @@ function renderLedgerTable(filterText) {
     const colCount = order.length + 1;
 
     if (filterText) {
-        const keyword = filterText.trim().toLowerCase();
-        data = data.filter(function(item) {
-            return (item.ceNumber || '').toLowerCase().indexOf(keyword) !== -1
-                || (item.modelName || '').toLowerCase().indexOf(keyword) !== -1
-                || (item.manufacturer || '').toLowerCase().indexOf(keyword) !== -1
-                || (item.location || '').toLowerCase().indexOf(keyword) !== -1;
-        });
+        // 全角スペースを半角スペースに置換し、前後の余白を除去して小文字化
+        const normalizedInput = filterText.replace(/ /g, ' ').trim().toLowerCase();
+
+        // 1. スペースで区切って「ANDグループ」を作成
+        const andGroups = normalizedInput.split(/\s+/).filter(Boolean);
+
+        if (andGroups.length > 0) {
+            data = data.filter(function(item) {
+                // すべてのANDグループを満たしているかチェック
+                return andGroups.every(function(group) {
+                    // 2. カンマ（半角 , または 全角 、）で区切って「ORキーワード」を作成
+                    const orKeywords = group.split(/,|、/).filter(Boolean);
+
+                    // 3. ORキーワードのうち「少なくとも1つ」が含まれているかチェック
+                    return orKeywords.some(function(kw) {
+                        // 全項目のうち「いずれかのフィールド」に該当キーワードが含まれているか
+                        return LEDGER_COLUMNS.some(function(col) {
+                            const val = item[col.key];
+                            return val !== undefined && val !== null && String(val).toLowerCase().includes(kw);
+                        });
+                    });
+                });
+            });
+        }
     }
 
     if (data.length === 0) {
@@ -305,7 +296,6 @@ function renderLedgerTable(filterText) {
             editLedger(item.id);
         };
 
-        // order（並び順）通りにデータセルを動的生成してズレを防止
         const cellsHtml = order.map(function(key) {
             const val = (item[key] !== undefined && item[key] !== null) ? item[key] : '';
             return '<td>' + val + '</td>';
@@ -317,33 +307,6 @@ function renderLedgerTable(filterText) {
 }
 
 // --- 編集フォームを開いてデータセット ---
-// 編集フォームを開いてデータセット
-function editLedger(id) {
-    if (typeof openTab === 'function') {
-        openTab('ledger-form-page', '✏️ 機器台帳編集');
-    }
-
-    const data = getStoredLedgers();
-    const item = data.find(function(d) { return String(d.id) === String(id); });
-    if (!item) {
-        alert('指定されたデータが見つかりませんでした。');
-        return;
-    }
-
-    const formTitle = document.getElementById('form-title');
-    if (formTitle) formTitle.textContent = '機器台帳 編集';
-
-    // IDをセット
-    setFieldValue('ledger-id', item.id);
-
-    // ★ LEDGER_COLUMNS に基づいて全フィールドへ自動セット
-    LEDGER_COLUMNS.forEach(function(col) {
-        if (col.formId) {
-            setFieldValue(col.formId, item[col.key]);
-        }
-    });
-}
-
 function bindLedgerTableEvents() {
     const tbody = document.getElementById('ledger-table-body');
     if (!tbody || tbody.dataset.dblclickBound) return;
@@ -363,27 +326,26 @@ function searchLedger() {
     renderLedgerTable(keyword);
 }
 
-
-// --- 画面読み込み時の処理（エラーによる白紙化を防ぐ） ---
-document.addEventListener("DOMContentLoaded", function() {
-    const container = document.getElementById('ledger-container');
-    if (container) {
-        fetch('./ledger.html')
-            .then(function(response) {
-                if (!response.ok) throw new Error();
-                return response.text();
-            })
-            .then(function(data) {
-                container.innerHTML = data;
-                initLedger();
-            })
-            .catch(function() {
-                initLedger(); // エラー時も止めずにテーブルを描画
-            });
-    } else {
-        initLedger();
+// --- 検索クリア処理 ---
+function clearLedgerSearch() {
+    const input = document.getElementById('ledger-search-input');
+    if (input) {
+        input.value = ''; // 入力欄をクリア
     }
-});
+    renderLedgerTable(''); // 検索キーワード空でテーブルを再描画
+}
+
+// 検索入力欄に対するリアルタイム検索イベントのバインド
+function bindLedgerSearchEvent() {
+    const input = document.getElementById('ledger-search-input');
+    if (!input || input.dataset.searchBound) return;
+
+    // 文字入力のたびに即時検索を実行
+    input.addEventListener('input', function() {
+        searchLedger();
+    });
+    input.dataset.searchBound = 'true';
+}
 
 // 描画を実行する初期化関数
 function initLedger() {
@@ -393,56 +355,13 @@ function initLedger() {
     if (typeof renderLedgerTable === 'function') {
         renderLedgerTable();
     }
+    // 検索入力イベントを登録
+    bindLedgerSearchEvent();
 }
 
 // ledger.jsが読み込まれた際にも自動実行
 initLedger();
 
-// --- 一覧テーブルの描画関数 ---
-// 一覧テーブルの描画関数
-function renderLedgerTable() {
-    const tbody = document.getElementById('ledger-table-body');
-    if (!tbody) return;
-
-    // LocalStorage からデータ取得
-    const rawData = localStorage.getItem('ledger_data_list');
-    const list = rawData ? JSON.parse(rawData) : [];
-
-    tbody.innerHTML = '';
-
-    if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px;">データがありません</td></tr>';
-        return;
-    }
-
-    list.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.setAttribute('data-id', item.id || '');
-        
-        // ダブルクリックで編集画面を開く
-        tr.ondblclick = () => {
-            if (typeof editLedger === 'function') {
-                editLedger(item.id);
-            }
-        };
-        tr.style.cursor = 'pointer';
-
-        // ★HTMLの <th> の並び順と完全に一致するように <td> を配置
-        tr.innerHTML = `
-            <td>${item.ceNumber || ''}</td>
-            <td>${item.operatingStatus || ''}</td>
-            <td>${item.deviceCategory || ''}</td>
-            <td>${item.modelName || ''}</td>
-            <td>${item.manufacturer || ''}</td>
-            <td>${item.dept || ''}</td>
-            <td>${item.location || ''}</td>
-            <td>${item.serialNumber || ''}</td>
-            <td>${item.assetNumber || ''}</td>
-            <td>${item.maintStatus || ''}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
 // --- 編集画面を開いてデータをフォームにセットする関数 ---
 async function editLedger(id) {
     // 1. まず入力フォーム画面（ledger-form-page）のタブを開く
@@ -529,3 +448,167 @@ async function openNewLedgerForm() {
     }
 }
 
+// 各セレクトボックスの選択肢定義を一括管理
+const SELECT_OPTIONS_CONFIG = {
+    'device-category': [
+        '生体情報モニタ', '送信機', '輸液ポンプ', 'シリンジポンプ', 
+        '人工呼吸器', 'フットポンプ', '除細動器', 'その他'
+    ],
+    'operating-status': [
+        '稼働中', '貸出中', '点検中', '修理中', '廃棄'
+    ]
+    // 部署やメーカー等もここに追加可能
+};
+
+// 設定に基づいてすべてのセレクトボックスを初期化
+function initAllSelectOptions() {
+    Object.keys(SELECT_OPTIONS_CONFIG).forEach(function(selectId) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+
+        const options = SELECT_OPTIONS_CONFIG[selectId];
+        select.innerHTML = '<option value="">選択してください</option>';
+
+        options.forEach(function(optText) {
+            const opt = document.createElement('option');
+            opt.value = optText;
+            opt.textContent = optText;
+            select.appendChild(opt);
+        });
+    });
+}
+
+// --- 1. 各項目ごとのタグ保存用データストア ---
+const tagStore = {
+    operatingStatus: [],   // 稼働状況
+    deviceCategory: [],    // 機器分類
+    modelName: [],         // 機種名
+    manufacturer: [],      // メーカー
+    deliveryStaff: [],     // 搬入担当者
+    maintenanceStatus: [], // 保守状況
+    repairVendor: []       // 修理連絡先
+};
+
+// ページ読み込み完了時に初期化
+document.addEventListener('DOMContentLoaded', function() {
+    initTagInputs();
+});
+
+// --- 2. タグ入力欄のイベント設定（datalist連動対応） ---
+function initTagInputs() {
+    const inputs = document.querySelectorAll('.tag-input');
+
+    inputs.forEach(function(input) {
+        const key = input.dataset.key;
+        if (!key || !tagStore.hasOwnProperty(key)) return;
+
+        // datalistの選択肢が選ばれた時（またはフォーカスが外れた時）
+        input.addEventListener('change', function() {
+            addTagFromInput(input, key);
+        });
+
+        // キー入力（Enter / カンマ / 読点）でタグ化
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ',' || e.key === '、') {
+                e.preventDefault();
+                addTagFromInput(input, key);
+            } 
+            // 空の状態でBackspaceを押すと直前のタグを削除
+            else if (e.key === 'Backspace' && input.value === '' && tagStore[key].length > 0) {
+                removeTag(key, tagStore[key].length - 1);
+            }
+        });
+    });
+}
+
+// --- 3. 入力値／選択値をタグとして追加する共通処理 ---
+function addTagFromInput(input, key) {
+    const value = input.value.trim().replace(/,/g, ''); // カンマを除去
+    if (!value) return;
+
+    // 重複登録の防止（必要に応じて解除可）
+    if (!tagStore[key].includes(value)) {
+        tagStore[key].push(value);
+        renderTags(key);
+    }
+
+    // 入力欄をクリア
+    input.value = '';
+
+    // 機種名が変更された場合は画像プレビューを更新
+    if (key === 'modelName' && typeof updateDeviceImagePreview === 'function') {
+        updateDeviceImagePreview();
+    }
+}
+
+// --- 4. タグの描画処理（DOM生成） ---
+function renderTags(key) {
+    const container = document.getElementById('tag-container-' + key);
+    if (!container) return;
+
+    // 既存のタグ要素（.tag）のみ削除（<input>や<datalist>は残す）
+    const existingTags = container.querySelectorAll('.tag');
+    existingTags.forEach(function(tag) { tag.remove(); });
+
+    const input = container.querySelector('.tag-input');
+
+    // データストア内の配列からタグを1つずつ生成
+    tagStore[key].forEach(function(text, index) {
+        const tagSpan = document.createElement('span');
+        tagSpan.className = 'tag';
+        tagSpan.innerHTML = `${text} <button type="button" class="tag-remove" onclick="removeTag('${key}', ${index})">&times;</button>`;
+        
+        // input要素の前に挿入
+        container.insertBefore(tagSpan, input);
+    });
+}
+
+// --- 5. タグの削除処理 ---
+function removeTag(key, index) {
+    if (tagStore[key] && tagStore[key][index] !== undefined) {
+        tagStore[key].splice(index, 1);
+        renderTags(key);
+
+        // 機種名タグ削除時の画像プレビュー連動
+        if (key === 'modelName' && typeof updateDeviceImagePreview === 'function') {
+            updateDeviceImagePreview();
+        }
+    }
+}
+
+// --- 6. データを保存用のオブジェクト/文字列として一括取得 ---
+function getTagValues() {
+    const result = {};
+    Object.keys(tagStore).forEach(function(key) {
+        // カンマ区切りの文字列で返す場合（例: "稼働, 廃棄待ち"）
+        result[key] = tagStore[key].join(', ');
+        
+        // 配列として取得したい場合は result[key] = [...tagStore[key]]; を使用
+    });
+    return result;
+}
+
+// --- 7. 既存データを編集画面でタグとして一括復元（セット） ---
+function setTagValues(data) {
+    if (!data) return;
+
+    Object.keys(tagStore).forEach(function(key) {
+        const val = data[key];
+        if (Array.isArray(val)) {
+            tagStore[key] = [...val];
+        } else if (typeof val === 'string' && val.trim() !== '') {
+            tagStore[key] = val.split(/,|、/).map(s => s.trim()).filter(Boolean);
+        } else {
+            tagStore[key] = [];
+        }
+        renderTags(key);
+    });
+}
+
+// --- 8. 入力フォームのリセット処理 ---
+function resetTagInputs() {
+    Object.keys(tagStore).forEach(function(key) {
+        tagStore[key] = [];
+        renderTags(key);
+    });
+}

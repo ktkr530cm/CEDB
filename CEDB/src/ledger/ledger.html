@@ -26,7 +26,6 @@
                     <label>絞り込み検索</label>
                     <input type="text" id="ledger-search-input" placeholder="CE番号・機種名等..." onkeydown="if(event.key === 'Enter') searchLedger();">
                     <div>
-                        <button class="btn" onclick="searchLedger()">🔍 検索</button>
                         <button class="btn-sub" onclick="clearLedgerSearch()">クリア</button>
                     </div>
                 </div>
@@ -146,41 +145,32 @@
                         
                     </div>
 
-                    <h3 class="form-section-title">識別情報</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="serial-number">シリアル番号</label>
-                            <input type="text" id="serial-number" placeholder="例: SN-000123">
-                        </div>
-                        <div class="form-group">
-                            <label for="asset-number">資産番号</label>
-                            <input type="text" id="asset-number" placeholder="例: A-000123">
-                        </div>
-                        <div class="form-group">
-                            <label for="ch-number">CH番号</label>
-                            <input type="text" id="ch-number" placeholder="例: CH-001">
-                        </div>
-                        <div class="form-group">
-                            <label for="barcode">バーコード</label>
-                            <input type="text" id="barcode" placeholder="バーコード番号">
-                        </div>
-                        <div class="form-group">
-                            <label for="gs1-128">GS1-128</label>
-                            <input type="text" id="gs1-128" placeholder="GS1-128コード">
-                        </div>
-                    </div>
-
-                    <h3 class="form-section-title">搬入情報</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="reg-date">登録日</label>
-                            <input type="date" id="reg-date">
-                        </div>
-                        <div class="form-group">
-                            <label for="delivery-staff">搬入担当者</label>
-                            <input type="text" id="delivery-staff" placeholder="担当者名">
-                        </div>
-                    </div>
+                    <h3 class="form-section-title">登録・廃棄情報</h3>
+<div class="form-grid">
+    <div class="form-group">
+        <label for="reg-date">登録日</label>
+        <input type="date" id="reg-date">
+    </div>
+    <div class="form-group">
+        <label for="delivery-staff">納入担当者</label>
+        <input type="text" id="delivery-staff" placeholder="担当者名">
+    </div>
+    <div class="form-group">
+        <!-- ID重複を解消 -->
+        <label for="disposal-date">廃棄日</label>
+        <input type="date" id="disposal-date">
+    </div>
+    <div class="form-group">
+        <!-- ID重複を解消 -->
+        <label for="disposal-staff">廃棄担当者</label>
+        <input type="text" id="disposal-staff" placeholder="担当者名">
+    </div>
+    <div class="form-group col-span-2">
+        <!-- 全角スペース除去 -->
+        <label for="disposal-reason">廃棄理由</label>
+        <textarea id="disposal-reason" rows="2" placeholder="廃棄理由を記入してください"></textarea>
+    </div>
+</div>
 
                     <h3 class="form-section-title">保守情報</h3>
                     <div class="form-grid">
@@ -202,7 +192,7 @@
                     <div class="form-grid">
                         <div class="form-group col-span-2">
                             <label for="remarks">備考</label>
-                            <textarea id="remarks" rows="4" placeholder="特記事項があれば入力してください"></textarea>
+                            <textarea id="remarks" rows="2" placeholder="特記事項があれば入力してください"></textarea>
                         </div>
                     </div>
                 </form>
