@@ -270,10 +270,10 @@ function renderAllLogs() {
             <td class="details-cell">${safeDisplayDetails}</td>
             <td class="staff-cell" onclick="event.stopPropagation();">${renderStaffCheckboxes(log.id, confirmedStaff)}</td>
             <td onclick="event.stopPropagation();">
-       　　　　<div class="delete-cell-wrap">
-           　　　<button type="button" class="btn-delete" onclick="deleteWorklog('${log.id}')">削除</button>
-       　　　　</div>
-   　　　　　</td>
+             <div class="delete-cell-wrap">
+             <button type="button" class="btn-delete" onclick="deleteWorklog('${log.id}')">削除</button>
+            </div>
+            </td>
         `;
 
         // 4. テーブルに追加

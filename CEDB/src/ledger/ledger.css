@@ -19,12 +19,16 @@
 }
 
 /* --- ページ全体の背景色 --- */
-/* --- ページ全体の背景色とスクロール防止 --- */
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden;                /* 画面全体のスクロールを禁止（1ページに固定） */
+    overflow-x: hidden;
+    overflow-y: auto; /* 〇 縦スクロールを明示的に許可 */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
 }
 
 body {

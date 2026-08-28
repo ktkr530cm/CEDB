@@ -29,14 +29,13 @@
 #worklog-page .record-table td:nth-child(7),
 #past-worklog-page .record-table th:nth-child(7),
 #past-worklog-page .record-table td:nth-child(7){ width: 60px; }  /* 操作 */
-　
 
 /* 全体基本スタイル */
 body {
-    font-family: sans-serif;
-    margin: 20px;
-    background-color: #f4f6f9;
-    color: #333;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 2px;
+    background-color: #f0f2f5;
+    color: #2c3e50;
 }
 
 /* ページ切替制御 (最重要) */
@@ -61,36 +60,49 @@ body {
     display: inline-block;
     padding: 8px 16px;
     font-size: 14px;
-    font-weight: bold;
-    color: #fff;
-    background-color: #55db34;
-    border: none;
-    border-radius: 6px;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #34495e;
+    border: 1px solid #2c3e50;
+    border-radius: 5px;
     cursor: pointer;
     text-decoration: none;
     min-height: 40px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
 }
 
 .btn:hover {
-    opacity: 0.85;
+    opacity: 0.9;
+    background-color: #2c3e50;
 }
 
 #worklog-page .btn-sub,
 #worklog-form-page .btn-sub {
-    background-color: #7f8c8d;
+    background-color: #606f7b;
+    border-color: #4b545c;
     margin-left: 0px;
     padding: 3px 12px;
-    border-radius: 6px;
+    border-radius: 5px;
     line-height: 1;
 }
 
-
 #worklog-form-page .btn.btn-save {
-    background-color: #2ecc71;
+    background-color: #27ae60;
+    border-color: #219653;
+}
+
+#worklog-form-page .btn.btn-save:hover {
+    background-color: #219653;
 }
 
 #worklog-form-page .btn.btn-cancel {
-    background-color: #95a5a6;
+    background-color: #7f8c8d;
+    border-color: #707b7c;
+}
+
+#worklog-form-page .btn.btn-cancel:hover {
+    background-color: #707b7c;
 }
 
 .delete-cell-wrap {
@@ -101,29 +113,44 @@ body {
 }
 
 .btn-delete {
-    background-color: #e74c3c;
+    background-color: #c0392b;
     color: white;
     border: none;
-    padding: 6px 12px;
-    border-radius: 15px;
+    padding: 5px 10px;
+    border-radius: 4px;
     cursor: pointer;
-    font-weight: bold;
-    display: inline-flex;      /* 追加 */
-    align-items: center;       /* 追加 */
-    justify-content: center;   /* 追加 */
-    line-height: 1;            /* 追加：余分な行高を排除 */
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
     margin: 0;
-    white-space: nowrap;   /* 追加：文字を折り返さない */
-    flex-shrink: 0;        /* 追加：親に押しつぶされて縮まないようにする */
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
 }
 
+.btn-delete:hover {
+    background-color: #a93226;
+}
 
 /* フォーム構造 */
 .worklog-form-panel {
     background-color: #ffffff;
-    border: 1px solid #dee2e6;
-    padding: 20px;
+    border: 1px solid #dcdfe6;
+    padding: 10px 20px 20px 20px;
     border-radius: 6px;
+    margin-top: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.worklog-form-panel h2,
+.worklog-form-panel h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #2c3e50;
+    font-weight: 600;
 }
 
 .form-row {
@@ -134,37 +161,48 @@ body {
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 8px;
     flex: 1;
     min-width: 0px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 6px;
-    font-weight: bold;
-    font-size: 14px;
+    margin-bottom: 3px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #4a5568;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
     font-size: 14px;
+    color: #2d3748;
+    background-color: #fafafa;
     box-sizing: border-box;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4a5568;
+    background-color: #ffffff;
 }
 
 .form-buttons {
     display: flex;
-     justify-content: flex-end; 
-     padding: 10px 20px;
+    justify-content: flex-end; 
+    padding: 10px 20px;
     gap: 10px;
     margin-top: 15px;
 }
-
 
 /* スタッフグリッド */
 .staff-grid {
@@ -179,12 +217,13 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 2px;
-    font-size: 14px;
+    font-size: 13px;
+    color: #4a5568;
     cursor: pointer;
     white-space: nowrap;
     user-select: none;
-    min-width: 0;         /* ← 追加：各アイテムが縮められるようにする */
-    overflow: hidden;      /* ← はみ出た分は隠す */
+    min-width: 0;
+    overflow: hidden;
 }
 
 .staff-checkbox-item input[type="checkbox"] {
@@ -194,22 +233,24 @@ body {
     cursor: pointer;
     transform: scale(0.7);   
     transform-origin: center;
+    accent-color: #34495e;
 }
 
 .staff-cell {
-    width: 50px;      /* 好きな幅に調整 */
+    width: 50px;
     max-width: 180px;
 }
 
 /* 重要度バッジ */
 .badge {
     display: inline-block;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
     color: white;
     text-align: center;
+    letter-spacing: 0.5px;
 }
 
 .badge-high {
@@ -217,7 +258,7 @@ body {
 }
 
 .badge-low {
-    background-color: #95a5a6;
+    background-color: #7f8c8d;
 }
 
 /* テーブル設定 */
@@ -226,36 +267,50 @@ body {
     table-layout: fixed;  
     border-collapse: collapse;
     margin-top: 10px;
-    font-size: 14px;
+    font-size: 13px;
     background-color: #fff;
     min-width: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 #worklog-page .record-table th,
 #worklog-page .record-table td,
 #past-worklog-page .record-table th,
 #past-worklog-page .record-table td {
-    border: 1px solid #bdc3c7;
-    padding: 10px 8px;
+    border: 1px solid #e2e8f0;
+    padding: 8px 10px;
     text-align: center; 
     vertical-align: middle;
     white-space: pre-wrap;
     word-break: break-word;
+    color: #2d3748;
+}
+
+/* 連絡事項欄（ヘッダーとデータのセル）のみ左揃え */
+#worklog-page .record-table .details-cell,
+#past-worklog-page .record-table .details-cell {
+    text-align: left;
 }
 
 #worklog-page .record-table th,
 #past-worklog-page .record-table th {
-    background-color: #e9ecef;
-    font-weight: bold;
-    color: #2c3e50;
+    background-color: #2c3e50;
+    font-weight: 600;
+    color: #ffffff;
+    border-color: #2c3e50;
 }
 
 #worklog-page .record-table tr:nth-child(even),
 #past-worklog-page .record-table tr:nth-child(even) {
-    background-color: #f8f9fa;
+    background-color: #f8fafc;
 }
 
-/* 新規作成・過去アーカイブボタンの右寄せ＋小型化 */
+#worklog-page .record-table tr:hover,
+#past-worklog-page .record-table tr:hover {
+    background-color: #edf2f7;
+}
+
+/* 新規作成・過去アーカイブボタン */
 .btn-group-right {
     display: flex;
     justify-content: flex-end;
@@ -264,8 +319,8 @@ body {
 }
 
 .btn-sm {
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 8px 16px;
+    font-size: 14px;
     width: auto;
     min-height: auto;
 }
@@ -274,19 +329,20 @@ body {
 #log-details {
     white-space: pre-wrap;
     word-break: break-word;
+    field-sizing: content;
 }
 
 /* 行の背景色をなめらかに変化させるための共通設定 */
 .record-row {
-    transition: background-color 0.3s ease;
+    transition: background-color 0.2s ease;
 }
 
 /* 全員確認済み（過去アーカイブ側）の通常時の背景色 */
 .record-complete {
-    background-color: #e8f8f5;
+    background-color: #f0fdf4;
 }
 
 /* 全員チェックが揃った瞬間、一時的に鮮やかな緑にするアニメーション用クラス */
 .record-complete-animate {
-    background-color: #e8f8f5 !important;
+    background-color: #dcfce7 !important;
 }
