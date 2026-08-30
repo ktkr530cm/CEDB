@@ -314,3 +314,30 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 } else {
     document.addEventListener("DOMContentLoaded", initWorklog);
 }
+
+/**
+ * 連絡事項入力欄（textarea）の高さを文字量に合わせて自動調整する
+ */
+function initAutoResizeTextarea() {
+    const textarea = document.getElementById('log-details');
+    if (!textarea) return;
+
+    // 高さ調整の共通処理
+    const adjustHeight = () => {
+        // 一旦高さを'auto'にリセットして、縮小時の正しい scrollHeight を取得できるようにする
+        textarea.style.height = 'auto';
+        // 入力内容の全体の高さに合わせて要素の高さを更新
+        textarea.style.height = textarea.scrollHeight + 'px';
+    };
+
+    // 入力イベント（文字入力・削除・貼り付け時）に発火
+    textarea.addEventListener('input', adjustHeight);
+
+    // フォーム表示時や初期描画時にも正しく高さをセットできるよう一度実行
+    adjustHeight();
+}
+
+// DOMの読み込み完了時に実行
+document.addEventListener('DOMContentLoaded', () => {
+    initAutoResizeTextarea();
+});

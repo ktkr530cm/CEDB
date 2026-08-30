@@ -33,7 +33,7 @@
 /* 全体基本スタイル */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    margin: 2px;
+    margin: 0px;
     background-color: #f0f2f5;
     color: #2c3e50;
 }
@@ -41,6 +41,8 @@ body {
 /* ページ切替制御 (最重要) */
 .page {
     display: none;
+    padding: 0; /* 追加：内側余白を無くす */
+    margin: 0;  /* 追加：外側余白を無くす */
 }
 
 .page.active {
@@ -266,7 +268,7 @@ body {
     width: 100%;
     table-layout: fixed;  
     border-collapse: collapse;
-    margin-top: 10px;
+    margin-top: 0px;
     font-size: 13px;
     background-color: #fff;
     min-width: 0;
@@ -329,7 +331,14 @@ body {
 #log-details {
     white-space: pre-wrap;
     word-break: break-word;
-    field-sizing: content;
+    /* --- 自動高さ調整のための追加設定 --- */
+    min-height: 80px;         /* 初期高さ（最低限確保する高さ） */
+    max-height: 500px;        /* 広がりすぎを防ぐ上限（必要に応じて調整） */
+    resize: none;             /* 手動のリサイズハンドルを非表示にしてすっきりさせる */
+    overflow-y: auto;         /* 上限を超えた場合は内部スクロール */
+    field-sizing: content;    /* 対応ブラウザでの自動高さ調整 */
+    transition: height 0.1s ease; /* 伸縮をなめらかに */
+
 }
 
 /* 行の背景色をなめらかに変化させるための共通設定 */
