@@ -53,18 +53,25 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 0px;
+    padding: 0px 12px 4px;
+}
+
+#worklog-page .header-container h2,
+#past-worklog-page .header-container h2 {
+    margin: 0;
 }
 
 /* ボタン系 */
 #worklog-page .btn,
-#worklog-form-page .btn {
+#worklog-form-page .btn ,
+#past-worklog-page .btn {
     display: inline-block;
     padding: 8px 16px;
     font-size: 14px;
     font-weight: 600;
     color: #ffffff;
-    background-color: #34495e;
+    background-color: #27ae60;
     border: 1px solid #2c3e50;
     border-radius: 5px;
     cursor: pointer;
@@ -80,7 +87,8 @@ body {
 }
 
 #worklog-page .btn-sub,
-#worklog-form-page .btn-sub {
+#worklog-form-page .btn-sub,
+#past-worklog-page .btn-sub {
     background-color: #606f7b;
     border-color: #4b545c;
     margin-left: 0px;
@@ -147,10 +155,15 @@ body {
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
+#worklog-page .header-container h2,
+#past-worklog-page .header-container h2 {
+    margin: 0;                /* ブラウザ標準の見出し余白をリセット */
+}
+
 .worklog-form-panel h2,
 .worklog-form-panel h3 {
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     color: #2c3e50;
     font-weight: 600;
 }
@@ -163,7 +176,7 @@ body {
 }
 
 .form-group {
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     flex: 1;
     min-width: 0px;
 }
@@ -203,7 +216,7 @@ body {
     justify-content: flex-end; 
     padding: 10px 20px;
     gap: 10px;
-    margin-top: 15px;
+    margin-top: 3px;
 }
 
 /* スタッフグリッド */
@@ -317,14 +330,25 @@ body {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-    margin-bottom: 15px;
+    margin-bottom: 4px;
+    margin-top: 0px;          /* 念のため明示 */
+    padding: 0 12px;          /* header-container の左右paddingと揃える */
 }
 
 .btn-sm {
+    display: inline-block;
     padding: 8px 16px;
     font-size: 14px;
-    width: auto;
-    min-height: auto;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #27ae60;
+    border: 1px solid #2c3e50;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    min-height: 40px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
 }
 
 /* 連絡事項の入力欄（textarea）の設定 */
@@ -333,7 +357,7 @@ body {
     word-break: break-word;
     /* --- 自動高さ調整のための追加設定 --- */
     min-height: 80px;         /* 初期高さ（最低限確保する高さ） */
-    max-height: 500px;        /* 広がりすぎを防ぐ上限（必要に応じて調整） */
+    max-height: 200px;        /* 広がりすぎを防ぐ上限（必要に応じて調整） */
     resize: none;             /* 手動のリサイズハンドルを非表示にしてすっきりさせる */
     overflow-y: auto;         /* 上限を超えた場合は内部スクロール */
     field-sizing: content;    /* 対応ブラウザでの自動高さ調整 */

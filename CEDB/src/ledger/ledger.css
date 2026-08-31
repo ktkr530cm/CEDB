@@ -23,8 +23,7 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
-    overflow-y: auto; /* 〇 縦スクロールを明示的に許可 */
+    overflow: auto; /* ブラウザ全体のスクロールを遮断（メインエリアに任せる） */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background-color: var(--bg-page);
     color: var(--text-primary);
@@ -45,7 +44,7 @@ body {
     gap: 20px;
     align-items: flex-start;         /* 上揃えにして各領域の独立高さを維持 */
     width: 100%;
-    height: 100vh;                   /* 画面の高さにぴったり合わせる */
+    height: 90vh;                 /* 画面の高さにぴったり合わせる */
     box-sizing: border-box;
     padding: 0;
 }
@@ -294,7 +293,8 @@ main {
     max-width: 820px;
     margin: 0 auto;
     box-sizing: border-box;
-    height: auto;
+    height: 100%;
+    justify-content: space-between; /* 各セクションを上下いっぱいに均等配置 */
     max-height: none;           /* 親要素の高さを超えない */
     overflow: visible;           /* はみ出し（スクロールバー）を遮断 */
     display: flex;
@@ -302,31 +302,31 @@ main {
 }
 
 /* --- セクション見出し --- */
-.form-section-title {
+#ledger-form-page .form-section-title {
     font-size: 15px;
     font-weight: 700;
     color: var(--text-primary);
     border-bottom: 2px solid var(--primary-color);
     padding-bottom: 4px;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin-top: 4px;
+    margin-bottom: 4px;
     letter-spacing: -0.01em;
 }
 
-.form-section-title:first-of-type {
+#ledger-form-page .form-section-title:first-of-type {
     margin-top: 0;
 }
 
 /* --- フォームグリッド (2列) --- */
-.form-grid {
+#ledger-form-page .form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px 16px;
-    margin-bottom: 6px;
+    gap: 3px 16px;
+    margin-bottom: 3px;
 }
 
 /* --- フォームの項目（ラベルと入力欄） --- */
-.form-group {
+#ledger-form-page .form-group {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -334,7 +334,7 @@ main {
 }
 
 /* ラベルのスタイル */
-.form-group label {
+#ledger-form-page .form-group label {
     width: 120px;
     flex-shrink: 0;
     font-size: 13px;
@@ -346,15 +346,15 @@ main {
 }
 
 /* 入力要素（標準的な高さとフォントサイズ） */
-.form-group input,
-.form-group select,
-.form-group textarea {
+#ledger-form-page .form-group input,
+#ledger-form-page .form-group select,
+#ledger-form-page .form-group textarea {
     width: 100%;
     flex: 1;
-    padding: 6px 10px;
+    padding: 4px 8px;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    font-size: 13.5px;
+    font-size: 13px;
     color: var(--text-primary);
     background-color: #f8fafc;
     box-sizing: border-box;
@@ -362,9 +362,9 @@ main {
     font-family: inherit;
 }
 
-.form-group textarea {
-    height: 50px;            
-    min-height: 40px;             /* 初期高さをコンパクトに固定 */
+#ledger-form-page .form-group textarea {
+    height: 36px;            
+    min-height: 30px;             /* 初期高さをコンパクトに固定 */
     max-height: 300px;             /* 自動拡大の最大制限（必要に応じて調整可能） */
     field-sizing: content;          /* ★ 最新ブラウザ対応：入力文字量に応じて高さを自動調整 */
     resize: vertical;              /* 手動での縦リサイズのみ許可 */
@@ -373,22 +373,22 @@ main {
 }
 
 /* フォーカス時の標準アニメーション */
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+#ledger-form-page .form-group input:focus,
+#ledger-form-page .form-group select:focus,
+#ledger-form-page .form-group textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     background-color: #ffffff;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.required {
+#ledger-form-page .required {
     color: var(--danger-color);
     margin-left: 2px;
 }
 
 /* --- 2列にまたがる要素の指定 --- */
-.col-span-2 {
+#ledger-form-page .col-span-2 {
     grid-column: 1 / -1;
 }
 
@@ -437,7 +437,7 @@ main {
 }
 
 /* 削除ボタン */
-.btn-delete {
+#ledger-form-page .btn-delete {
     background-color: var(--danger-color);
     color: #fff;
     border: none;
@@ -449,7 +449,7 @@ main {
     width: auto;
     transition: background-color 0.2s ease;
 }
-.btn-delete:hover {
+#ledger-form-page .btn-delete:hover {
     background-color: var(--danger-hover);
 }
 
