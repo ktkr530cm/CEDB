@@ -1,39 +1,32 @@
-/* --- デザイン変数定義（モダンカラー＆シャドウ） --- */
+/* --- デザイン変数定義（モダンカラー＆トーン） --- */
 :root {
-    --primary-color: #2563eb;        /* 主色: 鮮やかなブルー */
+    --primary-color: #2563eb;        /* メインブルー */
     --primary-hover: #1d4ed8;
-    --success-color: #10b981;        /* 新規作成: エメラルドグリーン */
-    --success-hover: #059669;
-    --danger-color: #ef4444;         /* 削除/必須: レッド */
+    --success-color: #27ae60;        /* 保存・新規登録: グリーン */
+    --success-hover: #219653;
+    --danger-color: #ef4444;         /* 削除・必須: レッド */
     --danger-hover: #dc2626;
-    --bg-page: #f1f5f9;              /* 背景: やわらかいライトグレー */
-    --bg-card: #ffffff;              /* カード背景 */
-    --border-color: #e2e8f0;         /* 境界線: 淡いグレー */
+    --bg-page: #f8fafc;              /* 全体背景: 明るいグレー */
+    --bg-card: #ffffff;              /* カード・枠背景 */
+    --border-color: #e2e8f0;         /* 境界線 */
     --border-dark: #cbd5e1;
-    --text-primary: #3c4352;         /* メインテキスト: ダークスレート */
+    --text-primary: #1e293b;         /* メインテキスト */
     --text-secondary: #64748b;       /* 補助テキスト */
     --radius-md: 8px;                /* 角丸: 標準 */
-    --radius-lg: 12px;               /* 角丸: カード用 */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --radius-lg: 12px;               /* 角丸: コンテナ用 */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* --- ページ全体の背景色 --- */
+/* --- ページ全体の背景・フォント設定 --- */
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: auto; /* ブラウザ全体のスクロールを遮断（メインエリアに任せる） */
+    overflow: auto;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background-color: var(--bg-page);
     color: var(--text-primary);
-    -webkit-font-smoothing: antialiased;
-}
-
-body {
-    background-color: var(--bg-page);
-    color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -42,66 +35,63 @@ body {
 #ledger-form-page .ledger-container {
     display: flex;
     gap: 20px;
-    align-items: flex-start;         /* 上揃えにして各領域の独立高さを維持 */
+    align-items: flex-start;
     width: 100%;
-    height: 90vh;                 /* 画面の高さにぴったり合わせる */
+    height: 90vh;
     box-sizing: border-box;
     padding: 0;
 }
 
-/* --- 左サイドバー（位置固定＆モダンデザイン） --- */
+/* --- 左サイドバー（フラット・モダンデザイン） --- */
 .ledger-sidebar {
     width: 240px;
     flex-shrink: 0;
-    max-height: calc(100vh - 12px); /* 画面からはみ出さないよう上限を指定 */
+    max-height: calc(100vh - 24px);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     background-color: var(--bg-card);
-    padding: 16px;
+    padding: 20px 16px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     border: 1px solid var(--border-color);
     box-sizing: border-box;
 }
 
-/* スクロールバーのカスタマイズ */
+/* サイドバー・スクロールバー */
 .ledger-sidebar::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
 }
 .ledger-sidebar::-webkit-scrollbar-thumb {
     background-color: var(--border-dark);
     border-radius: 9999px;
 }
-.ledger-sidebar::-webkit-scrollbar-track {
-    background: transparent;
-}
 
-/* タイトル見出し */
+/* 見出し */
 .ledger-sidebar h2 {
     font-size: 15px;
     font-weight: 700;
     margin: 0;
-    padding-bottom: 10px;
+    padding-bottom: 12px;
     border-bottom: 2px solid var(--primary-color);
     color: var(--text-primary);
     letter-spacing: -0.01em;
 }
 
-/* セパレータ線 */
+/* 区切り線 */
 .ledger-sidebar hr {
     border: none;
     border-top: 1px solid var(--border-color);
-    margin: 4px 0;
+    margin: 6px 0;
 }
 
-/* 検索入力欄・セレクトボックス等（サイドバー内） */
+/* 入力・選択要素（サイドバー） */
 .ledger-sidebar input[type="text"],
 .ledger-sidebar input[type="date"],
 .ledger-sidebar select {
     width: 100%;
-    padding: 9px 12px;
+    padding: 8px 12px;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     font-size: 13px;
@@ -117,10 +107,9 @@ body {
     outline: none;
     border-color: var(--primary-color);
     background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-/* ラベルテキスト */
 .ledger-sidebar label {
     font-size: 12px;
     font-weight: 600;
@@ -129,22 +118,23 @@ body {
     margin-bottom: 4px;
 }
 
-/* サイドバー内ボタン共通 */
+/* --- サイドバーボタンの共通指定 --- */
+.ledger-sidebar button,
 .ledger-sidebar .btn,
-.ledger-sidebar .btn-sub,
-.ledger-sidebar button {
+.ledger-sidebar .btn-sub {
+    width: 100%;
     padding: 10px 14px;
     border-radius: var(--radius-md);
     font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.01em;
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: var(--shadow-sm);
+    box-sizing: border-box;
+    display: block;
 }
 
-/* ボタンのホバー・アクティブアニメーション */
 .ledger-sidebar button:hover {
     opacity: 0.95;
     transform: translateY(-1px);
@@ -153,7 +143,7 @@ body {
     transform: translateY(0);
 }
 
-/* 検索ボタン（鮮やかなブルー） */
+/* 個別カラー定義 */
 .ledger-sidebar button[onclick="searchLedger()"] {
     background-color: var(--primary-color);
     color: #ffffff;
@@ -162,196 +152,174 @@ body {
     background-color: var(--primary-hover);
 }
 
-/* 新規登録ボタン（アクセントグリーン） */
-.ledger-sidebar button[onclick="openNewLedgerForm()"] {
-    background-color: var(--success-color);
+.ledger-sidebar button[onclick="openNewLedgerForm()"],
+#ledger-form-page .ledger-sidebar button[type="submit"] {
+    background-color: var(--success-color) !important;
+    color: #ffffff !important;
+}
+.ledger-sidebar button[onclick="openNewLedgerForm()"]:hover,
+#ledger-form-page .ledger-sidebar button[type="submit"]:hover {
+    background-color: var(--success-hover) !important;
+}
+
+.ledger-sidebar .btn-sub {
+    background-color: #64748b;
     color: #ffffff;
 }
-.ledger-sidebar button[onclick="openNewLedgerForm()"]:hover {
-    background-color: var(--success-hover);
+.ledger-sidebar .btn-sub:hover {
+    background-color: #475569;
 }
 
 /* --- メインエリア --- */
 main {
     flex: 1;
     min-width: 0;
-    height: 100%;                    /* コンテナ高さいっぱいに広げる */
-    max-height: calc(100vh - 12px);  /* 画面枠内に制限 */
-    overflow-y: auto;                /* 溢れた場合はメインエリア内でスクロール */
+    height: 100%;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
     background-color: var(--bg-card);
-    padding: 0;    
+    padding: 0;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     border: 1px solid var(--border-color);
     box-sizing: border-box;
 }
 
-/* --- ボタン共通 --- */
+/* --- メイン内の標準ボタン --- */
 #ledger-page .btn,
 #ledger-form-page .btn {
     background-color: var(--primary-color);
-    color: white;
+    color: #ffffff;
     border: none;
-    padding: 5px 10px;
+    padding: 8px 14px;
     border-radius: var(--radius-md);
     cursor: pointer;
     font-size: 13px;
     font-weight: 600;
-    width: 100%;
-    box-sizing: border-box;
     transition: all 0.2s ease;
     box-shadow: var(--shadow-sm);
 }
 
-#ledger-page .btn-sub,
-#ledger-form-page .btn-sub {
-    background-color: #94a3b8;
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    width: 100%;
-    box-sizing: border-box;
-    transition: all 0.2s ease;
-}
-
-.btn:hover, .btn-sub:hover {
-    opacity: 0.95;
-    transform: translateY(-1px);
-}
-.btn:active, .btn-sub:active {
-    transform: translateY(0);
-}
-
-/* --- テーブルコンテナ --- */
+/* --- 一覧テーブルコンテナ（スクロール親要素） --- */
 .table-container {
     width: 100%;
     height: 100%;
-    overflow: auto;
+    overflow: auto; /* スクロールをここで発生させて基準点を明確化 */
     position: relative;
+    box-sizing: border-box;
 }
 
-/* --- テーブル基本設定 --- */
-#ledger-page .record-table,
-#ledger-form-page .record-table {
+/* --- テーブル本体構造 --- */
+.record-table {
     width: max-content;
     min-width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate; /* stickyを正しく動作させるため collapse から変更 */
+    border-spacing: 0;
+    table-layout: auto;
 }
 
-.record-table th, .record-table td {
+.record-table th, 
+.record-table td {
     border-bottom: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
-    padding: 10px 14px;
+    padding: 11px 16px;
     white-space: nowrap;
-    transition: background-color 0.15s ease;
     font-size: 13px;
+    box-sizing: border-box;
+    text-align: center;      /* 全ての列をデフォルトで中央揃え */
+    vertical-align: middle;
+    background-color: #ffffff; /* 固定時の透過防止 */
 }
 
+/* 1. 先頭行（ヘッダー）の固定 */
 .record-table thead th {
     position: sticky;
     top: 0;
-    background-color: #f8fafc;
+    z-index: 10;
+    background-color: #f1f5f9;
     color: var(--text-secondary);
     font-weight: 600;
     text-transform: uppercase;
     font-size: 12px;
-    letter-spacing: 0.05em;
-    z-index: 2;
+    letter-spacing: 0.03em;
     border-bottom: 2px solid var(--border-dark);
 }
 
-.record-table tbody td:first-child {
+/* 2. 先頭列（左端1列目）の固定（※ここを追加） */
+.record-table th:first-child,
+.record-table td:first-child {
     position: sticky;
     left: 0;
-    background-color: var(--bg-card);
-    color: var(--text-primary);
-    font-weight: 600;
-    z-index: 1;
+    z-index: 5;
+    background-color: #ffffff;
 }
 
-.record-table thead tr th:first-child {
-    position: sticky;
-    top: 0;
-    left: 0;
+/* 3. 左上（先頭行かつ先頭列）の交差セル固定（※ここを追加） */
+.record-table thead th:first-child {
+    z-index: 15; /* 最前面に表示 */
+    background-color: #f1f5f9;
+}
+
+.record-table tbody tr:hover td {
     background-color: #f8fafc;
-    z-index: 10;
 }
 
-/* ==========================================================================
-   単票フォームデザイン（標準サイズ＆モダンデザイン）
-   ========================================================================== */
-
-/* --- 単票フォーム全体のコンテナ --- */
+/* --- 入力画面（単票フォーム） --- */
 .single-record-form {
     background-color: var(--bg-card);
-    padding: 0 20px 8px 20px;        /* 上部パディングを0にして最上部に配置 */
+    padding: 24px;
     border-radius: var(--radius-lg);
-    max-width: 820px;
+    max-width: 840px;
     margin: 0 auto;
     box-sizing: border-box;
-    height: 100%;
-    justify-content: space-between; /* 各セクションを上下いっぱいに均等配置 */
-    max-height: none;           /* 親要素の高さを超えない */
-    overflow: visible;           /* はみ出し（スクロールバー）を遮断 */
     display: flex;
     flex-direction: column;
+    gap: 16px;
 }
 
-/* --- セクション見出し --- */
 #ledger-form-page .form-section-title {
     font-size: 15px;
     font-weight: 700;
     color: var(--text-primary);
     border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 4px;
-    margin-top: 4px;
-    margin-bottom: 4px;
-    letter-spacing: -0.01em;
+    padding-bottom: 6px;
+    margin-top: 12px;
+    margin-bottom: 8px;
 }
 
 #ledger-form-page .form-section-title:first-of-type {
     margin-top: 0;
 }
 
-/* --- フォームグリッド (2列) --- */
 #ledger-form-page .form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 3px 16px;
-    margin-bottom: 3px;
+    gap: 10px 20px;
 }
 
-/* --- フォームの項目（ラベルと入力欄） --- */
 #ledger-form-page .form-group {
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-bottom: 0;
 }
 
-/* ラベルのスタイル */
 #ledger-form-page .form-group label {
-    width: 120px;
+    width: 110px;
     flex-shrink: 0;
     font-size: 13px;
     font-weight: 600;
     color: var(--text-secondary);
-    margin-bottom: 0;
-    margin-right: 10px;
-    text-align: right;
+    text-align: center;
+    vertical-align: middle;
+    margin-right: 12px;
 }
 
-/* 入力要素（標準的な高さとフォントサイズ） */
 #ledger-form-page .form-group input,
 #ledger-form-page .form-group select,
 #ledger-form-page .form-group textarea {
     width: 100%;
     flex: 1;
-    padding: 4px 8px;
+    padding: 7px 10px;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     font-size: 13px;
@@ -360,26 +328,18 @@ main {
     box-sizing: border-box;
     transition: all 0.2s ease;
     font-family: inherit;
+    field-sizing: content;   /* 入力内容に応じて高さを自動変更 */
+    min-height: 38px;        /* 初期状態（空の場合）の最小高さを確保 */
+    resize: vertical;        /* 手動変更も許可したい場合は指定（不要なら none） */
 }
 
-#ledger-form-page .form-group textarea {
-    height: 36px;            
-    min-height: 30px;             /* 初期高さをコンパクトに固定 */
-    max-height: 300px;             /* 自動拡大の最大制限（必要に応じて調整可能） */
-    field-sizing: content;          /* ★ 最新ブラウザ対応：入力文字量に応じて高さを自動調整 */
-    resize: vertical;              /* 手動での縦リサイズのみ許可 */
-    overflow-y: auto;              /* 文字数が多い場合は入力欄の中でスクロール */
-    box-sizing: border-box;
-}
-
-/* フォーカス時の標準アニメーション */
 #ledger-form-page .form-group input:focus,
 #ledger-form-page .form-group select:focus,
 #ledger-form-page .form-group textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 #ledger-form-page .required {
@@ -387,81 +347,22 @@ main {
     margin-left: 2px;
 }
 
-/* --- 2列にまたがる要素の指定 --- */
 #ledger-form-page .col-span-2 {
     grid-column: 1 / -1;
 }
 
-/* --- 画像プレースホルダー --- */
-#device-image-wrap {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-}
-
-#device-image {
-    max-width: 180px;
-    max-height: 180px;
-    object-fit: contain;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    background: #fff;
-    box-shadow: var(--shadow-sm);
-}
-
-#device-image-placeholder {
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
-/* --- JS動的追加クラス対応 --- */
-#device-image,
-#device-image-placeholder {
-    display: none;
-}
-#device-image.is-active,
-#device-image-placeholder.is-active {
-    display: block;
-}
-
-.clickable-row {
-    cursor: pointer;
-}
-.no-data {
-    text-align: center;
-    color: var(--text-secondary);
-    padding: 24px;
-    font-size: 13px;
-}
-
 /* 削除ボタン */
-#ledger-form-page .btn-delete {
+.btn-delete {
     background-color: var(--danger-color);
-    color: #fff;
+    color: #ffffff;
     border: none;
     border-radius: var(--radius-md);
-    padding: 6px 12px;
-    font-size: 12px;
+    padding: 8px 16px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    width: auto;
     transition: background-color 0.2s ease;
 }
-#ledger-form-page .btn-delete:hover {
+.btn-delete:hover {
     background-color: var(--danger-hover);
-}
-
-/* ヘッダー・ドラッグ＆ドロップ */
-.draggable-col {
-    cursor: grab;
-    user-select: none;
-}
-.col-dragging {
-    opacity: 0.4;
-    background-color: #e2e8f0;
-}
-.col-drag-over {
-    border-left: 3px solid var(--primary-color);
 }

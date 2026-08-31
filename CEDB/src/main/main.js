@@ -3,6 +3,10 @@
 // ------------------------------------------------------------
 // フォルダ構成: main フォルダと同じ階層に各画面フォルダを配置
 
+// ------------------------------------------------------------
+// 画面切り替え制御（タブ表示版）
+// ------------------------------------------------------------
+
 const pageRoutes = {
     'worklog-page': '../worklog/worklog.html',
     'ledger-page': '../ledger/ledger.html'
@@ -11,7 +15,7 @@ const pageRoutes = {
 // 閲覧履歴の記録
 let tabHistory = ['main-page'];
 
-// pageIdからデフォルトのタブタイトルを割り当てる（tabTitle省略時のフォールバック）
+// pageIdからデフォルトのタブタイトルを割り当てる
 const defaultTabTitles = {
     'worklog-page': '🖊️連絡事項一覧',
     'worklog-form-page': '📝連絡事項入力',
@@ -47,14 +51,13 @@ function loadPageStyles(fetchedDoc, pagePath) {
 
         const newLink = document.createElement('link');
         newLink.rel = 'stylesheet';
-        // ↓ 開発中は毎回キャッシュを回避するため、タイムスタンプを付与
         newLink.href = resolvedHref + '?t=' + Date.now();
         newLink.dataset.loadedHref = resolvedHref;
         document.head.appendChild(newLink);
     });
 }
 
-// 指定した画面をタブとして開く（既存タブがあれば再利用して切り替えるだけ）
+// 指定した画面をタブとして開く
 async function openTab(pageId, tabTitle) {
     const displayTitle = tabTitle || defaultTabTitles[pageId] || '画面';
     const tabBar = document.getElementById('tab-bar');
@@ -77,8 +80,6 @@ async function openTab(pageId, tabTitle) {
 
                     loadPageStyles(doc, path);
 
-                    // <script>タグはappendChildしても実行されないため、
-                    // 別扱いにして後でcreateElementし直す
                     const scriptEls = [];
                     Array.from(doc.body.children).forEach(child => {
                         if (child.tagName === 'SCRIPT') {
@@ -88,7 +89,7 @@ async function openTab(pageId, tabTitle) {
                         }
                     });
 
-                    // スクリプトを新規に作り直して実行させる
+                    // スクリプトを新規に作り直して実行
                     const scriptBaseUrl = new URL(path, document.baseURI);
                     scriptEls.forEach(oldScript => {
                         const newScript = document.createElement('script');
@@ -102,11 +103,6 @@ async function openTab(pageId, tabTitle) {
                         }
                         document.body.appendChild(newScript);
                     });
-
-                    // 各画面の初期化は各画面のJS（例: worklog.js）側の
-                    // 自己実行ロジック（DOMContentLoaded / readyStateチェック）に任せる。
-                    // ここで初期化関数を直接呼ぶと、タブを閉じて再度開いた際に
-                    // 古い関数参照と新しいスクリプトの自己初期化が二重実行されるため行わない。
 
                     pageDiv = document.getElementById(pageId);
 
@@ -151,17 +147,24 @@ function switchTab(pageId) {
     document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
 
     const targetPage = document.getElementById(pageId);
-    if (targetPage) targetPage.classList.add('active');
+    if (targetPage) {
+        targetPage.classList.add('active');
+    }
 
     const targetTab = document.getElementById(`tab-btn-${pageId}`) || document.querySelector('.tab-bar .tab-item:first-child');
-    if (targetTab) targetTab.classList.add('active');
+    if (targetTab) {
+        targetTab.classList.add('active');
+    }
 
     if (tabHistory[tabHistory.length - 1] !== pageId) {
         tabHistory.push(pageId);
     }
+
+    // ★追加: display:none から display:flex に復帰した際、ブラウザにレイアウト再計算を促して幅・高さのズレを解消する
+    window.dispatchEvent(new Event('resize'));
 }
 
-// タブを閉じる関数（直前に見ていたタブに戻る：tabHistory方式）
+// タブを閉じる関数
 function closeTab(pageId) {
     const tabBtn = document.getElementById(`tab-btn-${pageId}`);
     if (tabBtn) tabBtn.remove();
@@ -181,36 +184,29 @@ function closeTab(pageId) {
 }
 
 // ------------------------------------------------------------
-// 既存のHTMLボタン要素に対するイベントリスナーの紐付けと属性の設定
+// イベントリスナー紐付け
 // ------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-    // ホームタブ（main-page）のクリックイベント
-    // ※HTMLに静的に書かれているため、他のタブと違いopenTab経由で
-    //   イベントが付与されないので、ここで個別に紐付ける
     const homeTab = document.getElementById('tab-btn-main-page');
     if (homeTab) {
         homeTab.addEventListener('click', () => switchTab('main-page'));
     }
 
-    // 画面遷移ターゲットとタイトルの定義マップ
     const buttonConfig = {
         '連絡事項': { target: 'worklog-page', title: '📋連絡事項一覧' },
         '機器台帳': { target: 'ledger-page', title: '機器台帳' }
     };
 
-    // main-btn-group および sub-btn-group 内のすべてのボタンを取得
     const buttons = document.querySelectorAll('.main-btn-group button, .sub-btn-group button');
 
     buttons.forEach(btn => {
         const label = btn.textContent.trim();
 
-        // 設定マップに存在するボタンには dataset 属性を付与
         if (buttonConfig[label]) {
             btn.dataset.target = buttonConfig[label].target;
             btn.dataset.title = buttonConfig[label].title;
         }
 
-        // クリックイベントのリスナーを設定
         btn.addEventListener('click', () => handleMenuClick(btn));
     });
 });

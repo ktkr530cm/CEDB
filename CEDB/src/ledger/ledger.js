@@ -45,30 +45,31 @@ const LEDGER_COLUMN_ORDER_KEY = 'ledger_column_order';
 // --- 一覧列の定義 ---
 // --- 機器台帳の全項目定義（項目の追加・削除・並び替えはここだけを編集） ---
 const LEDGER_COLUMNS = [
-    { key: 'ceNumber',        label: 'CE番号',    formId: 'ce-number' },
-    { key: 'operatingStatus', label: '稼働状況',  formId: 'operating-status' },
-    { key: 'deviceCategory',  label: '機器分類',  formId: 'device-category' },
-    { key: 'modelName',       label: '機種名',    formId: 'model-name' },
-    { key: 'manufacturer',    label: 'メーカー',  formId: 'manufacturer' },
-    { key: 'dept',            label: '部署',      formId: 'dept' },
-    { key: 'prevDept',        label: '前部署',    formId: 'prev-dept' },
-    { key: 'location',        label: '配置場所',  formId: 'location' },
-    { key: 'serialNumber',    label: 'シリアル',  formId: 'serial-number' },
-    { key: 'assetNumber',     label: '資産番号',  formId: 'asset-number' },
-    { key: 'chNumber',        label: 'CH番号',    formId: 'ch-number' },
-    { key: 'barcode',         label: 'バーコード',formId: 'barcode' },
-    { key: 'gs1',             label: 'GS1-128',   formId: 'gs1-128' },
-    { key: 'maintStatus',     label: '保守状況',  formId: 'maint-status' },
-    { key: 'repairContact',   label: '修理連絡先',formId: 'repair-contact' },
-    { key: 'inspectionMonth', label: '点検月',    formId: 'inspection-month' },
-    { key: 'inspectionWeek',  label: '点検週',    formId: 'inspection-week' },
-    { key: 'regDate',         label: '登録日',    formId: 'reg-date' },
-    { key: 'deliveryStaff',   label: '納品担当',  formId: 'delivery-staff' },
-    { key: 'yearsInUse',      label: '耐用年数',  formId: 'years-in-use' },
-    { key: 'disposalDate',    label: '廃棄日',    formId: 'disposal-date' },
-    { key: 'disposalStaff',   label: '廃棄担当',  formId: 'disposal-staff' },
-    { key: 'disposalReason',  label: '廃棄理由',  formId: 'disposal-reason' },
-    { key: 'remarks',         label: '備考',      formId: 'remarks' }
+    { key: 'ceNumber',          label: 'CE番号',    formId: 'ce-number' },
+    { key: 'operatingStatus',   label: '稼働状況',  formId: 'operating-status' },
+    { key: 'deviceCategory',    label: '機器分類',  formId: 'device-category' },
+    { key: 'modelName',         label: '機種名',    formId: 'model-name' },
+    { key: 'manufacturer',      label: 'メーカー',  formId: 'manufacturer' },
+    { key: 'dept',              label: '部署',      formId: 'dept' },
+    { key: 'prevDept',          label: '前部署',    formId: 'prev-dept' },
+    { key: 'location',          label: '配置場所',  formId: 'location' },
+    { key: 'serialNumber',      label: 'シリアル',  formId: 'serial-number' },
+    { key: 'assetNumber',       label: '資産番号',  formId: 'asset-number' },
+    { key: 'chNumber',          label: 'CH番号',    formId: 'ch-number' },
+    { key: 'barcode',           label: 'バーコード',formId: 'barcode' },
+    { key: 'gs1',               label: 'GS1-128',   formId: 'gs1-128' },
+    { key: 'maintStatus',       label: '保守状況',  formId: 'maint-status' },
+    { key: 'repairContact',     label: '修理連絡先',formId: 'repair-contact' },
+    { key: 'bimonthlyInspection', label: '点検頻度',formId: 'bimonthly-inspection' },
+    { key: 'inspectionMonth',   label: '点検月',    formId: 'inspection-month' },
+    { key: 'inspectionWeek',    label: '点検週',    formId: 'inspection-week' },
+    { key: 'regDate',           label: '登録日',    formId: 'reg-date' },
+    { key: 'deliveryStaff',     label: '納品担当',  formId: 'delivery-staff' },
+    { key: 'yearsInUse',        label: '耐用年数',  formId: 'years-in-use' },
+    { key: 'disposalDate',      label: '廃棄日',    formId: 'disposal-date' },
+    { key: 'disposalStaff',     label: '廃棄担当',  formId: 'disposal-staff' },
+    { key: 'disposalReason',    label: '廃棄理由',  formId: 'disposal-reason' },
+    { key: 'remarks',           label: '備考',      formId: 'remarks' }
 ];
 
 const LEDGER_COLUMN_KEYS = LEDGER_COLUMNS.map(function(c) { return c.key; });
@@ -101,6 +102,7 @@ function resetLedgerColumnOrder() {
 let ledgerDragColumnKey = null;
 
 // --- ヘッダー行描画（ドラッグ&ドロップ対応） ---
+// --- ヘッダー行描画（ドラッグ&ドロップ対応） ---
 function renderLedgerTableHeader() {
     const headRow = document.getElementById('ledger-table-head-row');
     if (!headRow) return;
@@ -119,6 +121,16 @@ function renderLedgerTableHeader() {
         th.draggable = true;
         th.dataset.colKey = key;
         th.title = 'ドラッグで列の順番を変更できます';
+
+        // ★追加: 各列の最小幅をJSで直接固定（文字が潰れるのを防ぐ）
+        // 項目によって長さを変えたい場合は switch 文等で分岐可能
+        if (key === 'modelName' || key === 'remarks') {
+            th.style.minWidth = '180px'; // 長めの項目
+        } else if (key === 'ceNumber' || key === 'operatingStatus') {
+            th.style.minWidth = '100px'; // 短めの項目
+        } else {
+            th.style.minWidth = '130px'; // 標準幅
+        }
 
         th.addEventListener('dragstart', (e) => {
             ledgerDragColumnKey = key;
@@ -162,6 +174,7 @@ function renderLedgerTableHeader() {
     const opTh = document.createElement('th');
     opTh.textContent = '操作';
     opTh.className = 'col-action';
+    opTh.style.minWidth = '80px'; // ★操作列の幅も固定
     headRow.appendChild(opTh);
 }
 
@@ -241,7 +254,6 @@ function deleteLedger(id) {
     }
 }
 
-// --- 一覧テーブル描画 ---
 // --- 一覧テーブル描画（カンマ区切り＝OR、スペース区切り＝AND対応） ---
 function renderLedgerTable(filterText) {
     if (filterText === undefined) filterText = '';
@@ -361,13 +373,14 @@ function initLedger() {
 
 // ledger.jsが読み込まれた際にも自動実行
 initLedger();
+//削除（）；
 
 // --- 編集画面を開いてデータをフォームにセットする関数 ---
 async function editLedger(id) {
     // 1. まず入力フォーム画面（ledger-form-page）のタブを開く
     if (typeof openTab === 'function') {
         await openTab('ledger-form-page', '機器登録・編集');
-    }
+    }　
 
     // 2. LocalStorageから対象のデータを検索
     const rawData = localStorage.getItem('ledger_data_list');

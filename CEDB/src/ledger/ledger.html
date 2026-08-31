@@ -15,13 +15,10 @@
             <!-- 左サイドバー（共通操作パネル） -->
             <aside class="ledger-sidebar">
                 <h2>機器台帳 メニュー</h2>
-                
                 <div>
                     <button class="btn" onclick="openNewLedgerForm()">＋ 新規登録</button>
                 </div>
-
                 <hr>
-
                 <div>
                     <label>絞り込み検索</label>
                     <input type="text" id="ledger-search-input" placeholder="CE番号・機種名等..." onkeydown="if(event.key === 'Enter') searchLedger();">
@@ -29,9 +26,7 @@
                         <button class="btn-sub" onclick="clearLedgerSearch()">クリア</button>
                     </div>
                 </div>
-
                 <hr>
-
                 <button class="btn-sub" onclick="resetLedgerColumnOrder()" title="列の並び順を初期状態に戻します">↺ 列順リセット</button>
             </aside>
 
@@ -61,8 +56,8 @@
                 
                 <!-- 保存・キャンセルボタン -->
                 <div>
-                    <button type="submit" form="ledger-form" class="btn">💾 保存</button>
-                    <button type="button" class="btn-sub" onclick="cancelLedgerForm()">キャンセル</button>
+                   <button type="submit" form="ledger-form" class="btn-success">💾 保存</button>
+                   <button type="button" class="btn-sub" onclick="cancelLedgerForm()">キャンセル</button>
                 </div>
 
                 <hr>
@@ -199,6 +194,7 @@
             </main>
         </div>
     </div>
+    
 
 <!-- JavaScriptの読み込み -->
 <script src="ledger.js"></script>
