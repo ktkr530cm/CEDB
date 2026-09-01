@@ -210,7 +210,8 @@ main {
 }
 
 /* --- テーブル本体構造 --- */
-.record-table {
+#ledger-page .record-table,
+#ledger-form-page .record-table {
     width: max-content;
     min-width: 100%;
     border-collapse: separate; /* stickyを正しく動作させるため collapse から変更 */

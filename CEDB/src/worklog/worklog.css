@@ -39,13 +39,17 @@ body {
 }
 
 /* ページ切替制御 (最重要) */
-.page {
+#worklog-page,
+#past-worklog-page,
+#worklog-form-page {
     display: none;
-    padding: 0; /* 追加：内側余白を無くす */
-    margin: 0;  /* 追加：外側余白を無くす */
+    padding: 0;
+    margin: 0;
 }
 
-.page.active {
+#worklog-page.active,
+#past-worklog-page.active,
+#worklog-form-page.active {
     display: block;
 }
 
@@ -277,7 +281,7 @@ body {
 }
 
 /* テーブル設定 */
-.record-table {
+#worklog-page .record-table {
     width: 100%;
     table-layout: fixed;  
     border-collapse: collapse;
@@ -379,3 +383,4 @@ body {
 .record-complete-animate {
     background-color: #dcfce7 !important;
 }
+
