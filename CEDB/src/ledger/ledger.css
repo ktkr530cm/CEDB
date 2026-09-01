@@ -210,8 +210,7 @@ main {
 }
 
 /* --- テーブル本体構造 --- */
-#ledger-page .record-table,
-#ledger-form-page .record-table {
+.record-table {
     width: max-content;
     min-width: 100%;
     border-collapse: separate; /* stickyを正しく動作させるため collapse から変更 */
@@ -366,4 +365,22 @@ main {
 }
 .btn-delete:hover {
     background-color: var(--danger-hover);
+}
+
+/* 画面最前面に浮かび上がるポップアップ（テーブルの枠線やスクロールに影響されない） */
+#global-ledger-tooltip {
+    position: fixed;
+    z-index: 999999;
+    padding: 10px 14px;
+    background-color: #1e293b;     /* ダークグレー背景 */
+    color: #ffffff;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;          /* 改行(\n)を忠実に表示 */
+    word-break: break-word;
+    max-width: 360px;
+    border-radius: 6px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    pointer-events: none;          /* マウスカーソルの操作を透過 */
+    display: none;
 }
