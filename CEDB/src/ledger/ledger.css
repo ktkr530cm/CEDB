@@ -30,27 +30,47 @@ html, body {
     -webkit-font-smoothing: antialiased;
 }
 
+/* --- 親要素の右余白（padding）を解除して右端まで伸ばす --- */
+#ledger-page,
+#ledger-form-page {
+    padding-top: 0;
+    padding-right: 0;
+    padding-left: 0;
+}
+
 /* --- レイアウト全体（横並び設定） --- */
 #ledger-page .ledger-container,
 #ledger-form-page .ledger-container {
     display: flex;
-    gap: 20px;
+    gap: 10px;
     align-items: flex-start;
     width: 100%;
-    height: 90vh;
+    height: 95vh;
+    box-sizing: border-box;
+    padding: 0;
+}
+
+/* --- レイアウト全体（横並び設定） --- */
+#ledger-page .ledger-container,
+#ledger-form-page .ledger-container {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    width: 100%;
+    height: 86vh;
     box-sizing: border-box;
     padding: 0;
 }
 
 /* --- 左サイドバー（フラット・モダンデザイン） --- */
 .ledger-sidebar {
-    width: 240px;
+    width: 200px;
     flex-shrink: 0;
     max-height: calc(100vh - 24px);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 5px;
     background-color: var(--bg-card);
     padding: 20px 16px;
     border-radius: var(--radius-lg);
@@ -163,18 +183,19 @@ html, body {
 }
 
 .ledger-sidebar .btn-sub {
-    background-color: #64748b;
+    background-color: #606f7b;
     color: #ffffff;
 }
 .ledger-sidebar .btn-sub:hover {
-    background-color: #475569;
+    background-color: #606f7b;
 }
 
 /* --- メインエリア --- */
-main {
+#ledger-page main,
+#ledger-form-page main {
     flex: 1;
     min-width: 0;
-    height: 100%;
+    height: 106%;
     max-height: calc(100vh - 24px);
     overflow-y: auto;
     background-color: var(--bg-card);
@@ -201,7 +222,8 @@ main {
 }
 
 /* --- 一覧テーブルコンテナ（スクロール親要素） --- */
-.table-container {
+#ledger-page .table-container,
+#ledger-form-page .table-container {
     width: 100%;
     height: 100%;
     overflow: auto; /* スクロールをここで発生させて基準点を明確化 */
@@ -210,7 +232,8 @@ main {
 }
 
 /* --- テーブル本体構造 --- */
-.record-table {
+#ledger-page .record-table,
+#ledger-form-page .record-table {
     width: max-content;
     min-width: 100%;
     border-collapse: separate; /* stickyを正しく動作させるため collapse から変更 */
@@ -218,8 +241,10 @@ main {
     table-layout: auto;
 }
 
-.record-table th, 
-.record-table td {
+#ledger-page .record-table th, 
+#ledger-page .record-table td,
+#ledger-form-page .record-table th,
+#ledger-form-page .record-table td {
     border-bottom: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
     padding: 11px 16px;
@@ -232,7 +257,8 @@ main {
 }
 
 /* 1. 先頭行（ヘッダー）の固定 */
-.record-table thead th {
+#ledger-page .record-table thead th,
+#ledger-form-page .record-table thead th {
     position: sticky;
     top: 0;
     z-index: 10;
@@ -246,8 +272,10 @@ main {
 }
 
 /* 2. 先頭列（左端1列目）の固定（※ここを追加） */
-.record-table th:first-child,
-.record-table td:first-child {
+#ledger-page .record-table th:first-child,
+#ledger-page .record-table td:first-child,
+#ledger-form-page .record-table th:first-child,
+#ledger-form-page .record-table td:first-child {
     position: sticky;
     left: 0;
     z-index: 5;
@@ -255,12 +283,14 @@ main {
 }
 
 /* 3. 左上（先頭行かつ先頭列）の交差セル固定（※ここを追加） */
-.record-table thead th:first-child {
+#ledger-page .record-table thead th:first-child,
+#ledger-form-page .record-table thead th:first-child {
     z-index: 15; /* 最前面に表示 */
     background-color: #f1f5f9;
 }
 
-.record-table tbody tr:hover td {
+#ledger-page .record-table tbody tr:hover td,
+#ledger-form-page .record-table tbody tr:hover td {
     background-color: #f8fafc;
 }
 
@@ -352,7 +382,9 @@ main {
 }
 
 /* 削除ボタン */
-.btn-delete {
+./* --- 修正後 --- */
+#ledger-page .btn-delete,
+#ledger-form-page .btn-delete {
     background-color: var(--danger-color);
     color: #ffffff;
     border: none;
@@ -363,7 +395,8 @@ main {
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
-.btn-delete:hover {
+#ledger-page .btn-delete:hover,
+#ledger-form-page .btn-delete:hover {
     background-color: var(--danger-hover);
 }
 

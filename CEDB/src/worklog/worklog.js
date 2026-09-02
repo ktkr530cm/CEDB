@@ -93,7 +93,7 @@ function editWorklog(id, date, category, priority, author, details) {
     if (categoryInput) categoryInput.value = category || "臨床";
     if (priorityInput) priorityInput.value = priority || "通常";
     if (authorInput) authorInput.value = author || "";
-    if (detailsInput) detailsInput.value = details || "";
+    if (detailsInput) detailsInput.innerHTML = details || "";   // ★ .value → .innerHTML に変更
 
     if (formTitle) formTitle.textContent = id ? "連絡事項 編集" : "連絡事項 新規登録";
 
@@ -108,7 +108,7 @@ function resetWorklogForm() {
     if (document.getElementById("log-category")) document.getElementById("log-category").value = "臨床";
     if (document.getElementById("log-priority")) document.getElementById("log-priority").value = "通常";
     if (document.getElementById("log-author")) document.getElementById("log-author").value = "";
-    if (document.getElementById("log-details")) document.getElementById("log-details").value = "";
+    if (document.getElementById("log-details")) document.getElementById("log-details").innerHTML = "";   // ★ .value → .innerHTML に変更
 
     const formTitle = document.getElementById("form-title");
     if (formTitle) formTitle.textContent = "連絡事項 新規登録";
@@ -118,12 +118,16 @@ function resetWorklogForm() {
 function saveWorklog() {
     const id = document.getElementById("log-id") ? document.getElementById("log-id").value : "";
     const dateVal = document.getElementById("log-date") ? document.getElementById("log-date").value : "";
-    const category = document.getElementById("log-category") ? document.getElementById("log-category").value : "";
     const priority = document.getElementById("log-priority") ? document.getElementById("log-priority").value : "";
     const author = document.getElementById("log-author") ? document.getElementById("log-author").value : "";
-    const details = document.getElementById("log-details") ? document.getElementById("log-details").value : "";
 
-    if (!dateVal || !details || !author) {
+    // ★ ここから変更：innerHTML（書式付き）とtextContent（バリデーション用の文字列）を分けて取得
+    const detailsEl = document.getElementById("log-details");
+    const details = detailsEl ? detailsEl.innerHTML : "";
+    const detailsText = detailsEl ? detailsEl.textContent.trim() : "";
+    // ★ ここまで変更
+
+    if (!dateVal || !detailsText || !author) {   // ★ !details → !detailsText に変更
         alert("「日付」「記入者」「連絡事項」を入力してください。");
         return;
     }
@@ -136,7 +140,6 @@ function saveWorklog() {
 
     if (existingIndex >= 0) {
         logs[existingIndex].date = formattedDate;
-        logs[existingIndex].category = category;
         logs[existingIndex].priority = priority;
         logs[existingIndex].author = author;
         logs[existingIndex].details = details;
@@ -144,7 +147,6 @@ function saveWorklog() {
         logs.unshift({
             id: logId,
             date: formattedDate,
-            category: category,
             priority: priority,
             author: author,
             details: details,
@@ -175,12 +177,14 @@ function cancelWorklogForm() {
 }
 
 // --- スタッフチェック切り替え処理 ---
-function toggleStaffConfirm(logId, staff) {
+function toggleStaffCheck(logId, staff) {
     let logs = getStoredLogs();
     const targetLog = logs.find(item => item.id === logId);
  
     if (targetLog) {
-        if (!targetLog.confirmedStaff) targetLog.confirmedStaff = [];
+        if (!Array.isArray(targetLog.confirmedStaff)) {
+            targetLog.confirmedStaff = [];
+        }
  
         const index = targetLog.confirmedStaff.indexOf(staff);
         if (index >= 0) {
@@ -191,18 +195,24 @@ function toggleStaffConfirm(logId, staff) {
  
         saveStoredLogs(logs);
  
-        const isAllChecked = staffList.every(s => targetLog.confirmedStaff.includes(s));
+        const currentStaffList = (typeof staffList !== 'undefined') ? staffList : [];
+        const isAllChecked = currentStaffList.length > 0 && currentStaffList.every(s => targetLog.confirmedStaff.includes(s));
  
         if (isAllChecked) {
-            // 全員チェック済みになった瞬間は、即座に移動させず
-            // 一旦その場で緑色に変化するアニメーションを見せてから移動する
-            animateCompletionThenRender(logId);
+            // アニメーション関数が存在すれば実行、なければ即時再描画してアーカイブ移動
+            if (typeof animateCompletionThenRender === 'function') {
+                animateCompletionThenRender(logId);
+            } else {
+                renderAllLogs();
+            }
         } else {
             renderAllLogs();
         }
     }
 }
- 
+
+// 互換性維持のためエイリアス（別名）としても定義
+const toggleStaffConfirm = toggleStaffCheck;
 // --- 全員確認済みになった行を、緑に変化させてから一覧を再描画（＝アーカイブへ移動）する ---
 function animateCompletionThenRender(logId) {
     const row = document.querySelector(`tr[data-log-id="${logId}"]`);
@@ -262,19 +272,15 @@ function renderAllLogs() {
         });
 
          // 3. 中身のセルを作成（確認状況セルは1つだけ）
-        tr.innerHTML = `
-            <td>${log.date}</td>
-            <td>${log.category}</td>
-            <td>${badgeHtml}</td>
-            <td>${log.author}</td>
-            <td class="details-cell">${safeDisplayDetails}</td>
-            <td class="staff-cell" onclick="event.stopPropagation();">${renderStaffCheckboxes(log.id, confirmedStaff)}</td>
-            <td onclick="event.stopPropagation();">
-             <div class="delete-cell-wrap">
-             <button type="button" class="btn-delete" onclick="deleteWorklog('${log.id}')">削除</button>
-            </div>
-            </td>
-        `;
+        /* 【修正後】 */
+tr.innerHTML = `
+    <td>${log.date || ''}</td>
+    <td><span class="badge ${log.priority === '至急' ? 'badge-high' : 'badge-low'}">${log.priority || '通常'}</span></td>
+    <td>${log.author || ''}</td>
+    <td class="details-cell">${log.details || ''}</td>
+    <td>${renderCheckboxesHTML(log)}</td>
+    <td>${renderDeleteBtnHTML(log)}</td>
+`;
 
         // 4. テーブルに追加
         if (isAllChecked) {
@@ -315,29 +321,154 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
     document.addEventListener("DOMContentLoaded", initWorklog);
 }
 
-/**
- * 連絡事項入力欄（textarea）の高さを文字量に合わせて自動調整する
- */
-function initAutoResizeTextarea() {
-    const textarea = document.getElementById('log-details');
-    if (!textarea) return;
 
-    // 高さ調整の共通処理
-    const adjustHeight = () => {
-        // 一旦高さを'auto'にリセットして、縮小時の正しい scrollHeight を取得できるようにする
-        textarea.style.height = 'auto';
-        // 入力内容の全体の高さに合わせて要素の高さを更新
-        textarea.style.height = textarea.scrollHeight + 'px';
-    };
 
-    // 入力イベント（文字入力・削除・貼り付け時）に発火
-    textarea.addEventListener('input', adjustHeight);
+// 確認状況のチェックボックスHTMLを生成する関数
+function renderCheckboxesHTML(log) {
+    // 上部で定義されている staffList を安全に参照
+    const currentStaffList = (typeof staffList !== 'undefined') ? staffList : [];
+    const confirmedStaff = log.confirmedStaff || log.checks || [];
 
-    // フォーム表示時や初期描画時にも正しく高さをセットできるよう一度実行
-    adjustHeight();
+    if (currentStaffList.length === 0) {
+        return `<span style="color: #999; font-size: 11px;">スタッフ未設定</span>`;
+    }
+
+    return `<div class="staff-grid">` + currentStaffList.map(staff => {
+        const isChecked = Array.isArray(confirmedStaff) 
+            ? confirmedStaff.includes(staff) 
+            : !!confirmedStaff[staff];
+
+        return `
+            <label class="staff-checkbox-item">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleStaffCheck('${log.id}', '${staff}')">
+                <span>${staff}</span>
+            </label>
+        `;
+    }).join('') + `</div>`;
 }
 
-// DOMの読み込み完了時に実行
-document.addEventListener('DOMContentLoaded', () => {
-    initAutoResizeTextarea();
+// 操作（削除ボタンなど）のHTMLを生成する関数
+function renderDeleteBtnHTML(log) {
+    return `
+        <div class="delete-cell-wrap">
+            <button class="btn-delete" onclick="deleteWorklog('${log.id}')">削除</button>
+        </div>
+    `;
+}
+
+// --- リッチテキスト編集用 ---
+let savedRange = null;
+
+function saveSelection() {
+    const sel = window.getSelection();
+    if (sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        const editor = document.getElementById('log-details');
+        if (editor && editor.contains(range.commonAncestorContainer)) {
+            savedRange = range.cloneRange();
+        }
+    }
+}
+
+function restoreSelection() {
+    if (savedRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+    }
+}
+
+function focusEditor() {
+    const editor = document.getElementById('log-details');
+    if (editor) {
+        editor.focus();
+        restoreSelection();
+    }
+}
+
+function toggleFormat(command) {
+    focusEditor();
+    document.execCommand(command, false, null);
+    saveSelection();
+}
+
+function applyFontColor(color) {
+    focusEditor();
+    document.execCommand('styleWithCSS', false, true);
+    document.execCommand('foreColor', false, color);
+    saveSelection();
+}
+
+function applyFontFamily(fontFamily) {
+    if (!fontFamily) return;
+    focusEditor();
+    document.execCommand('styleWithCSS', false, true);
+    document.execCommand('fontName', false, fontFamily);
+    saveSelection();
+
+    // ★ 追加：同じフォントを別の箇所に続けて適用できるよう、プルダウンを未選択に戻す
+    const select = document.getElementById('log-font-family');
+    if (select) select.value = '';
+}
+
+function applyFontSize(sizePx) {
+    if (!sizePx) return;
+    focusEditor();
+
+    // ★ 追加：文字色/フォント適用でtrueになったstyleWithCSS状態をリセットし、
+    //   確実に <font size="7"> タグが生成されるようにする
+    document.execCommand('styleWithCSS', false, false);
+
+    document.execCommand('fontSize', false, '7');
+    const editor = document.getElementById('log-details');
+    if (editor) {
+        editor.querySelectorAll('font[size="7"]').forEach(el => {
+            el.removeAttribute('size');
+            el.style.fontSize = sizePx + 'px';
+        });
+    }
+    saveSelection();
+
+    const select = document.getElementById('log-font-size');
+    if (select) select.value = '';
+}
+
+function clearFormat() {
+    focusEditor();
+
+    const editor = document.getElementById('log-details');
+    const sel = window.getSelection();
+    if (!editor || !sel.rangeCount) return;
+
+    const range = sel.getRangeAt(0);
+    if (!editor.contains(range.commonAncestorContainer)) return;
+
+    if (range.collapsed) {
+        // ★ 何も選択していない場合：入力欄全体の書式をクリア
+        const lines = editor.innerText.split('\n');
+        editor.innerHTML = '';
+        lines.forEach((line, i) => {
+            editor.appendChild(document.createTextNode(line));
+            if (i < lines.length - 1) editor.appendChild(document.createElement('br'));
+        });
+    } else {
+        // ★ 選択範囲がある場合：選択部分だけを書式なしテキストに置き換え
+        const selectedText = range.toString();
+        range.deleteContents();
+        const textNode = document.createTextNode(selectedText);
+        range.insertNode(textNode);
+
+        // カーソルを置き換えたテキストの直後に移動
+        range.setStartAfter(textNode);
+        range.setEndAfter(textNode);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+
+    saveSelection();
+}
+
+// ★ mouseup/keyupではなく、選択範囲の変化を確実に検知できるselectionchangeイベントを使用
+document.addEventListener('selectionchange', () => {
+    saveSelection();
 });

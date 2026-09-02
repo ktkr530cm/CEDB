@@ -20,17 +20,17 @@
 
     <div class="table-container">
         <table class="record-table">
-            <thead>
-                <tr>
-                    <th>日付</th>
-                    <th>区分</th>
-                    <th>重要度</th>
-                    <th>記入者</th>
-                    <th>連絡事項</th>
-                    <th>確認状況</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
+            <!-- 【修正後】 -->
+<thead>
+    <tr>
+        <th>日付</th>
+        <th>重要度</th>
+        <th>記入者</th>
+        <th>連絡事項</th>
+        <th>確認状況</th>
+        <th>操作</th>
+    </tr>
+</thead>
             <tbody id="log-table-body"></tbody>
         </table>
     </div>
@@ -49,7 +49,6 @@
             <thead>
                 <tr>
                     <th>日付</th>
-                    <th>区分</th>
                     <th>重要度</th>
                     <th>記入者</th>
                     <th>連絡事項</th>
@@ -68,20 +67,13 @@
         <h2 id="form-title">連絡事項 新規登録</h2>
     </div>
 
-    <div class="worklog-form-panel">
+        <div class="worklog-form-panel">
         <input type="hidden" id="log-id">
 
         <div class="form-row">
             <div class="form-group">
                 <label for="log-date">日付</label>
                 <input type="date" id="log-date">
-            </div>
-            <div class="form-group">
-                <label for="log-category">区分</label>
-                <select id="log-category">
-                    <option value="臨床">臨床</option>
-                    <option value="事務">事務</option>
-                </select>
             </div>
         </div>
 
@@ -101,7 +93,38 @@
 
         <div class="form-group">
             <label for="log-details">連絡事項</label>
-            <textarea id="log-details" rows="4"></textarea>
+
+            <div class="editor-toolbar">
+                <select id="log-font-family" onchange="applyFontFamily(this.value)" title="フォント">
+                    <option value="">フォント</option>
+                    <option value="'Yu Gothic', sans-serif">ゴシック体</option>
+                    <option value="'Yu Mincho', serif">明朝体</option>
+                    <option value="Meiryo, sans-serif">メイリオ</option>
+                    <option value="'Courier New', monospace">等幅</option>
+                </select>
+
+                <select id="log-font-size" onchange="applyFontSize(this.value)" title="文字サイズ">
+                    <option value="">サイズ</option>
+                    <option value="12">12px</option>
+                    <option value="14">14px</option>
+                    <option value="16">16px</option>
+                    <option value="18">18px</option>
+                    <option value="24">24px</option>
+                    <option value="32">32px</option>
+                </select>
+
+                <span class="color-swatch-group" title="文字色">
+    <button type="button" class="color-swatch-btn" style="background-color:#e30613;" onmousedown="event.preventDefault()" onclick="applyFontColor('#e30613')" aria-label="赤"></button>
+    <button type="button" class="color-swatch-btn" style="background-color:#0033cc;" onmousedown="event.preventDefault()" onclick="applyFontColor('#0033cc')" aria-label="青"></button>
+    <button type="button" class="color-swatch-btn" style="background-color:#009944;" onmousedown="event.preventDefault()" onclick="applyFontColor('#009944')" aria-label="緑"></button>
+                </span>
+
+                <button type="button" class="editor-btn" onmousedown="event.preventDefault()" onclick="toggleFormat('bold')" title="太字"><b>B</b></button>
+                <button type="button" class="editor-btn" onmousedown="event.preventDefault()" onclick="toggleFormat('underline')" title="下線"><u>U</u></button>
+                <button type="button" class="editor-btn editor-btn-clear" onmousedown="event.preventDefault()" onclick="clearFormat()" title="書式クリア">クリア</button>
+            </div>
+
+            <div id="log-details" class="rich-editor" contenteditable="true" data-placeholder="連絡事項を入力してください"></div>
         </div>
 
         <div class="form-buttons">

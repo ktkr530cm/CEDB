@@ -57,7 +57,7 @@ const LEDGER_COLUMNS = [
     { key: 'assetNumber',       label: '資産番号',  formId: 'asset-number' },
     { key: 'chNumber',          label: 'CH番号',    formId: 'ch-number' },
     { key: 'barcode',           label: 'バーコード',formId: 'barcode' },
-    { key: 'gs1',               label: 'GS1-128',   formId: 'gs1-128' },
+    { key: 'gs1',               label: 'GS1-128',   formId: 'gs1' },
     { key: 'maintStatus',       label: '保守状況',  formId: 'maint-status' },
     { key: 'repairContact',     label: '修理連絡先',formId: 'repair-contact' },
     { key: 'bimonthlyInspection', label: '点検頻度',formId: 'bimonthly-inspection' },
@@ -209,7 +209,11 @@ function getFieldValue(id) {
 // --- 保存処理 ---
 function saveLedger() {
     const ceNumber = getFieldValue('ce-number');
-    const modelName = getFieldValue('model-name');
+    
+    // タグストアから機種名を取得、無ければ通常の要素から取得
+    let modelName = (tagStore.modelName && tagStore.modelName.length > 0) 
+        ? tagStore.modelName.join(', ') 
+        : getFieldValue('model-name');
 
     if (!ceNumber || !modelName) {
         alert('CE番号と機種名は必須です');
@@ -220,15 +224,14 @@ function saveLedger() {
     let data = getStoredLedgers();
     const existingIndex = data.findIndex(function(d) { return String(d.id) === String(id); });
 
-    // 新規作成時は空オブジェクト、編集時は既存レコードをコピーして基礎を作成
     const record = existingIndex >= 0 ? Object.assign({}, data[existingIndex]) : {};
-    
-    // IDを確定
     record.id = id;
 
-    // フォーム上の最新値で更新
+    // タグストアと通常の入力欄から値を一括取得
     LEDGER_COLUMNS.forEach(function(col) {
-        if (col.formId) {
+        if (col.tagKey && tagStore[col.tagKey] && tagStore[col.tagKey].length > 0) {
+            record[col.key] = tagStore[col.tagKey].join(', ');
+        } else if (col.formId) {
             record[col.key] = getFieldValue(col.formId);
         }
     });
@@ -373,14 +376,13 @@ function initLedger() {
 
 // ledger.jsが読み込まれた際にも自動実行
 initLedger();
-//削除（）；
 
 // --- 編集画面を開いてデータをフォームにセットする関数 ---
 async function editLedger(id) {
     // 1. まず入力フォーム画面（ledger-form-page）のタブを開く
     if (typeof openTab === 'function') {
         await openTab('ledger-form-page', '機器登録・編集');
-    }　
+    }
 
     // 2. LocalStorageから対象のデータを検索
     const rawData = localStorage.getItem('ledger_data_list');
@@ -415,6 +417,8 @@ async function editLedger(id) {
     
     setInputValue('maint-status', target.maintStatus);
     setInputValue('repair-contact', target.repairContact);
+    setInputValue('bimonthly-inspection', target.bimonthlyInspection);
+    setInputValue('inspection-person', target.inspectionPerson);
     setInputValue('inspection-month', target.inspectionMonth);
     setInputValue('inspection-week', target.inspectionWeek);
     setInputValue('reg-date', target.regDate);

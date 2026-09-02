@@ -76,16 +76,15 @@
 
                     <h3 class="form-section-title">基本情報</h3>
                     <div class="form-grid">
-                        <div class="form-group col-span-2">
-                            <label>機器画像</label>
-                            <div id="device-image-wrap">
-                                <img id="device-image" src="" alt="機器画像">
-                                <div id="device-image-placeholder">機種名を入力すると画像を表示します</div>
-                            </div>
-                        </div>
+                        
                         <div class="form-group">
                             <label for="ce-number">CE番号 <span class="required">*</span></label>
                             <input type="text" id="ce-number" placeholder="例: CE-00123" required>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="prev-dept">前部署</label>
+                          <input type="text" id="prev-dept" placeholder="例: 2階病棟">
                         </div>
 
                         <div class="form-group">
@@ -140,6 +139,34 @@
                         
                     </div>
 
+                    <h3 class="form-section-title">識別・コード情報</h3>
+<div class="form-grid">
+    <div class="form-group">
+        <label for="serial-number">シリアル</label>
+        <input type="text" id="serial-number" placeholder="S/N">
+    </div>
+    <div class="form-group">
+        <label for="asset-number">資産番号</label>
+        <input type="text" id="asset-number" placeholder="資産番号">
+    </div>
+    <div class="form-group">
+        <label for="ch-number">CH番号</label>
+        <input type="text" id="ch-number" placeholder="CH番号">
+    </div>
+    <div class="form-group">
+        <label for="barcode">バーコード</label>
+        <input type="text" id="barcode" placeholder="バーコード">
+    </div>
+    <div class="form-group">
+        <label for="gs1">GS1-128</label>
+        <input type="text" id="gs1" placeholder="GS1コード">
+    </div>
+    <div class="form-group">
+        <label for="years-in-use">耐用年数</label>
+        <input type="number" id="years-in-use" placeholder="例: 6">
+    </div>
+</div>
+
                     <h3 class="form-section-title">登録・廃棄情報</h3>
 <div class="form-grid">
     <div class="form-group">
@@ -178,9 +205,68 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="repair-contact">修理連絡先</label>
-                            <input type="text" id="repair-contact" placeholder="連絡先(電話番号等)">
+    <label for="repair-company">修理業者名</label>
+    <input type="text" id="repair-company" placeholder="例: ○○メディカル">
+    <input type="tel" id="repair-tel" placeholder="連絡先">
+</div>
+
+                        <div class="form-group">
+                            <label for="bimonthly-inspection">点検頻度</label>
+                            <select id="bimonthly-inspection">
+                                <option value="">選択してください</option>
+                                <option value="毎日点検">毎日点検</option>
+                                <option value="始業点検">始業点検</option>
+                                <option value="毎週点検">毎週点検</option>
+                                <option value="毎月点検">毎月点検</option>
+                                <option value="隔月点検">隔月点検</option>
+                            </select>
                         </div>
+ <div class="form-group">
+                            <label for="Inspection person">点検担当</label>
+                            <select id="inspection-person">
+                                <option value="">選択してください</option>
+                                <option value="カテ担当">カテ担当</option>
+                                <option value="臨床担当">臨床担当</option>
+                                <option value="ＯＰＥ担当">ＯＰＥ担当</option>
+                                <option value="保守担当">保守担当</option>
+                                <option value="透析担当">透析担当</option>
+                                <option value="ＨＢＯ担当">ＨＢＯ担当</option>
+                                <option value="使用後担当">使用後担当</option>
+                                <option value="２ｎｄ担当">２ｎｄ担当</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+    <label for="inspection-month">点検月</label>
+    <select id="bimonthly-inspection">
+                                <option value="">選択してください</option>
+                                <option value="４月">４月</option>
+                                <option value="５月">５月</option>
+                                <option value="６月">６月</option>
+                                <option value="７月">７月</option>
+                                <option value="８月">８月</option>
+                                <option value="９月">９月</option>
+                                <option value="１０月">１０月</option>
+                                <option value="１１月">１１月</option>
+                                <option value="１２月">１２月</option>
+                                <option value="１月">１月</option>
+                                <option value="２月">２月</option>
+                                <option value="３月">３月</option>
+    </select>
+    </div>
+<div class="form-group">
+    <label for="inspection-week">点検週</label>
+    <select id="inspection-week">
+                                <option value="">選択してください</option>
+                                <option value="１週目">１週目</option>
+                                <option value="２週目">２週目</option>
+                                <option value="３週目">３週目</option>
+                                <option value="４週目">４週目</option>
+    </select>
+</div>
+
+                       
+
                     </div>
 
                     <h3 class="form-section-title">備考</h3>

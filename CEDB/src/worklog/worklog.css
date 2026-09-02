@@ -3,32 +3,29 @@
 #past-worklog-page .record-table th:nth-child(1),
 #past-worklog-page .record-table td:nth-child(1){ width: 85px; }   /* 日付 */
 
+/* 【修正後】 */
+/* 2列目（区分）を削除したため、列番号を1つずつずらして再割り当て */
 #worklog-page .record-table th:nth-child(2),
 #worklog-page .record-table td:nth-child(2),
 #past-worklog-page .record-table th:nth-child(2),
-#past-worklog-page .record-table td:nth-child(2){ width: 60px; }   /* 区分 */
+#past-worklog-page .record-table td:nth-child(2){ width: 60px; }   /* 重要度 */
 
 #worklog-page .record-table th:nth-child(3),
 #worklog-page .record-table td:nth-child(3),
 #past-worklog-page .record-table th:nth-child(3),
-#past-worklog-page .record-table td:nth-child(3){ width: 60px; }   /* 重要度 */
+#past-worklog-page .record-table td:nth-child(3) { width: 60px; }   /* 記入者 */
 
-#worklog-page .record-table th:nth-child(4),
-#worklog-page .record-table td:nth-child(4),
-#past-worklog-page .record-table th:nth-child(4),
-#past-worklog-page .record-table td:nth-child(4) { width: 60px; }   /* 記入者 */
+/* 4列目（連絡事項）は指定なし＝残りの幅を自動で埋める */
 
-/* 5列目（連絡事項）は指定なし＝残りの幅を自動で埋める */
+#worklog-page .record-table th:nth-child(5),
+#worklog-page .record-table td:nth-child(5),
+#past-worklog-page .record-table th:nth-child(5),
+#past-worklog-page .record-table td:nth-child(5){ width: 250px; }  /* 確認状況 */
 
 #worklog-page .record-table th:nth-child(6),
 #worklog-page .record-table td:nth-child(6),
 #past-worklog-page .record-table th:nth-child(6),
-#past-worklog-page .record-table td:nth-child(6){ width: 250px; }  /* 確認状況 */
-
-#worklog-page .record-table th:nth-child(7),
-#worklog-page .record-table td:nth-child(7),
-#past-worklog-page .record-table th:nth-child(7),
-#past-worklog-page .record-table td:nth-child(7){ width: 60px; }  /* 操作 */
+#past-worklog-page .record-table td:nth-child(6){ width: 60px; }   /* 操作 */
 
 /* 全体基本スタイル */
 body {
@@ -72,7 +69,7 @@ body {
     font-weight: 600;
     color: #ffffff;
     background-color: #27ae60;
-    border: 1px solid #2c3e50;
+    border: 1px solid #606f7b;
     border-radius: 5px;
     cursor: pointer;
     text-decoration: none;
@@ -107,12 +104,12 @@ body {
 }
 
 #worklog-form-page .btn.btn-cancel {
-    background-color: #7f8c8d;
+    background-color: #606f7b;
     border-color: #707b7c;
 }
 
 #worklog-form-page .btn.btn-cancel:hover {
-    background-color: #707b7c;
+    background-color: #606f7b;
 }
 
 .delete-cell-wrap {
@@ -353,17 +350,80 @@ body {
 }
 
 /* 連絡事項の入力欄（textarea）の設定 */
-#log-details {
+/* ツールバー */
+.editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+
+/* ★ .form-group select { width:100%; } を打ち消すため、詳細度を上げて上書き */
+.form-group .editor-toolbar select {
+    width: auto;
+    padding: 4px 6px;
+    font-size: 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    background-color: #fafafa;
+    color: #2d3748;
+}
+
+/* ★ .form-group input { width:100%; padding:8px 10px; } を打ち消すため、詳細度を上げて上書き */
+.color-swatch-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.color-swatch-btn {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid #cbd5e0;
+    border-radius: 50%;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: transform 0.1s ease, border-color 0.1s ease;
+}
+
+.color-swatch-btn:hover {
+    transform: scale(1.15);
+    border-color: #4a5568;
+}
+
+.editor-btn-clear {
+    font-weight: 600;
+    color: #606f7b;
+}
+
+/* 連絡事項の入力欄（contenteditable）の設定 */
+#log-details.rich-editor {
     white-space: pre-wrap;
     word-break: break-word;
-    /* --- 自動高さ調整のための追加設定 --- */
-    min-height: 80px;         /* 初期高さ（最低限確保する高さ） */
-    max-height: 200px;        /* 広がりすぎを防ぐ上限（必要に応じて調整） */
-    resize: none;             /* 手動のリサイズハンドルを非表示にしてすっきりさせる */
-    overflow-y: auto;         /* 上限を超えた場合は内部スクロール */
-    field-sizing: content;    /* 対応ブラウザでの自動高さ調整 */
-    transition: height 0.1s ease; /* 伸縮をなめらかに */
+    min-height: 80px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 14px;
+    color: #2d3748;
+    background-color: #fafafa;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
 
+#log-details.rich-editor:focus {
+    outline: none;
+    border-color: #4a5568;
+    background-color: #ffffff;
+}
+
+#log-details.rich-editor:empty:before {
+    content: attr(data-placeholder);
+    color: #a0aec0;
 }
 
 /* 行の背景色をなめらかに変化させるための共通設定 */
