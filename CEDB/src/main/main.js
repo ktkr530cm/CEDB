@@ -19,7 +19,7 @@ let tabHistory = ['main-page'];
 const defaultTabTitles = {
     'worklog-page': '🖊️連絡事項一覧',
     'worklog-form-page': '📝連絡事項入力',
-    'past-worklog-page': '📜過去アーカイブ',
+    'past-worklog-page': '⌛過去アーカイブ',
     'ledger-page': '🧰機器台帳'
 };
 
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const buttonConfig = {
         '連絡事項': { target: 'worklog-page', title: '📋連絡事項一覧' },
-        '機器台帳': { target: 'ledger-page', title: '機器台帳' }
+        '機器台帳': { target: 'ledger-page', title: '🧰機器台帳' }
     };
 
     const buttons = document.querySelectorAll('.main-btn-group button, .sub-btn-group button');

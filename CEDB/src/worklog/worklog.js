@@ -259,7 +259,6 @@ function renderAllLogs() {
 
         // 1. 行要素 (tr) を作成
         const tr = document.createElement('tr');
-        tr.style.cursor = 'pointer';
         tr.dataset.logId = log.id;
         tr.classList.add('record-row');
         if (isAllChecked) {
@@ -267,12 +266,19 @@ function renderAllLogs() {
         }
 
         // 2. ダブルクリックイベントを直接JavaScriptで設定（これで改行が消えません）
-        tr.addEventListener('dblclick', () => {
-            editWorklogById(log.id);
-        });
+        // ★過去アーカイブ（全員確認済み＝isAllChecked）の行は編集不可にする
+        if (isAllChecked) {
+            tr.style.cursor = 'default';
+            tr.title = '確認済みのため編集できません';
+        } else {
+            tr.style.cursor = 'pointer';
+            tr.title = 'ダブルクリックで編集';
+            tr.addEventListener('dblclick', () => {
+                editWorklogById(log.id);
+            });
+        }
 
          // 3. 中身のセルを作成（確認状況セルは1つだけ）
-        /* 【修正後】 */
 tr.innerHTML = `
     <td>${log.date || ''}</td>
     <td><span class="badge ${log.priority === '至急' ? 'badge-high' : 'badge-low'}">${log.priority || '通常'}</span></td>
@@ -357,6 +363,7 @@ function renderDeleteBtnHTML(log) {
 }
 
 // --- リッチテキスト編集用 ---
+// --- リッチテキスト編集用 ---
 let savedRange = null;
 
 function saveSelection() {
@@ -388,25 +395,60 @@ function focusEditor() {
 
 function toggleFormat(command) {
     focusEditor();
-    document.execCommand(command, false, null);
-    saveSelection();
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+
+    if (range.collapsed) {
+        // 選択範囲がない場合はそのまま実行（カーソル位置調整は不要）
+        document.execCommand(command, false, null);
+        saveSelection();
+        return;
+    }
+
+    applyFormatWithCursorFix(range, () => {
+        document.execCommand(command, false, null);
+    });
 }
 
 function applyFontColor(color) {
     focusEditor();
-    document.execCommand('styleWithCSS', false, true);
-    document.execCommand('foreColor', false, color);
-    saveSelection();
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+
+    if (range.collapsed) {
+        document.execCommand('styleWithCSS', false, true);
+        document.execCommand('foreColor', false, color);
+        saveSelection();
+        return;
+    }
+
+    applyFormatWithCursorFix(range, () => {
+        document.execCommand('styleWithCSS', false, true);
+        document.execCommand('foreColor', false, color);
+    });
 }
 
 function applyFontFamily(fontFamily) {
     if (!fontFamily) return;
     focusEditor();
-    document.execCommand('styleWithCSS', false, true);
-    document.execCommand('fontName', false, fontFamily);
-    saveSelection();
+    const sel = window.getSelection();
 
-    // ★ 追加：同じフォントを別の箇所に続けて適用できるよう、プルダウンを未選択に戻す
+    if (sel.rangeCount) {
+        const range = sel.getRangeAt(0);
+        if (range.collapsed) {
+            document.execCommand('styleWithCSS', false, true);
+            document.execCommand('fontName', false, fontFamily);
+            saveSelection();
+        } else {
+            applyFormatWithCursorFix(range, () => {
+                document.execCommand('styleWithCSS', false, true);
+                document.execCommand('fontName', false, fontFamily);
+            });
+        }
+    }
+
     const select = document.getElementById('log-font-family');
     if (select) select.value = '';
 }
@@ -414,28 +456,35 @@ function applyFontFamily(fontFamily) {
 function applyFontSize(sizePx) {
     if (!sizePx) return;
     focusEditor();
-
-    // ★ 追加：文字色/フォント適用でtrueになったstyleWithCSS状態をリセットし、
-    //   確実に <font size="7"> タグが生成されるようにする
-    document.execCommand('styleWithCSS', false, false);
-
-    document.execCommand('fontSize', false, '7');
     const editor = document.getElementById('log-details');
-    if (editor) {
-        editor.querySelectorAll('font[size="7"]').forEach(el => {
-            el.removeAttribute('size');
-            el.style.fontSize = sizePx + 'px';
-        });
+    const sel = window.getSelection();
+
+    const applySizeCommand = () => {
+        document.execCommand('styleWithCSS', false, false);
+        document.execCommand('fontSize', false, '7');
+        if (editor) {
+            editor.querySelectorAll('font[size="7"]').forEach(el => {
+                el.removeAttribute('size');
+                el.style.fontSize = sizePx + 'px';
+            });
+        }
+    };
+
+    if (sel.rangeCount) {
+        const range = sel.getRangeAt(0);
+        if (range.collapsed) {
+            applySizeCommand();
+            saveSelection();
+        } else {
+            applyFormatWithCursorFix(range, applySizeCommand);
+        }
     }
-    saveSelection();
 
     const select = document.getElementById('log-font-size');
     if (select) select.value = '';
 }
 
 function clearFormat() {
-    focusEditor();
-
     const editor = document.getElementById('log-details');
     const sel = window.getSelection();
     if (!editor || !sel.rangeCount) return;
@@ -443,32 +492,117 @@ function clearFormat() {
     const range = sel.getRangeAt(0);
     if (!editor.contains(range.commonAncestorContainer)) return;
 
-    if (range.collapsed) {
-        // ★ 何も選択していない場合：入力欄全体の書式をクリア
-        const lines = editor.innerText.split('\n');
-        editor.innerHTML = '';
-        lines.forEach((line, i) => {
-            editor.appendChild(document.createTextNode(line));
-            if (i < lines.length - 1) editor.appendChild(document.createElement('br'));
-        });
-    } else {
-        // ★ 選択範囲がある場合：選択部分だけを書式なしテキストに置き換え
-        const selectedText = range.toString();
-        range.deleteContents();
-        const textNode = document.createTextNode(selectedText);
-        range.insertNode(textNode);
+    if (range.collapsed) return;
 
-        // カーソルを置き換えたテキストの直後に移動
-        range.setStartAfter(textNode);
-        range.setEndAfter(textNode);
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }
+    const selectedText = range.toString();
+    range.deleteContents();
+    const textNode = document.createTextNode(selectedText);
+    range.insertNode(textNode);
+
+    range.setStartAfter(textNode);
+    range.setEndAfter(textNode);
+    sel.removeAllRanges();
+    sel.addRange(range);
 
     saveSelection();
 }
 
-// ★ mouseup/keyupではなく、選択範囲の変化を確実に検知できるselectionchangeイベントを使用
+// 選択範囲の変化を常に検知して保存する
 document.addEventListener('selectionchange', () => {
     saveSelection();
 });
+
+// ★ 追加：選択範囲の右端にマーカーを置き、書式適用処理の後にその位置へカーソルを戻す共通処理
+function applyFormatWithCursorFix(range, applyFn) {
+    const editor = document.getElementById('log-details');
+    const sel = window.getSelection();
+
+    // 選択範囲の右端（終端）に目印用の一時マーカーを挿入
+    const marker = document.createElement('span');
+    marker.id = '__format-cursor-marker__';
+    marker.appendChild(document.createTextNode('\u200B'));
+
+    const endRange = range.cloneRange();
+    endRange.collapse(false);
+    endRange.insertNode(marker);
+
+    // 実際の書式適用処理（execCommand呼び出し）を実行
+    applyFn();
+
+    // 空になった書式タグの残骸を掃除（マーカー自体は対象外）
+    editor.querySelectorAll('b, i, u, font, span, strong, em').forEach(el => {
+        if (el.id !== '__format-cursor-marker__' && el.textContent === '') {
+            el.remove();
+        }
+    });
+
+    // マーカーの位置を探してカーソルを合わせ、マーカーを削除する
+    const foundMarker = document.getElementById('__format-cursor-marker__');
+    const newRange = document.createRange();
+
+    if (foundMarker) {
+        newRange.setStartBefore(foundMarker);
+        newRange.collapse(true);
+        foundMarker.remove();
+    } else {
+        newRange.selectNodeContents(editor);
+        newRange.collapse(false);
+    }
+
+    editor.normalize();
+    sel.removeAllRanges();
+    sel.addRange(newRange);
+    savedRange = newRange.cloneRange();
+}
+
+function clearFormat() {
+    const editor = document.getElementById('log-details');
+    const sel = window.getSelection();
+    if (!editor || !sel.rangeCount) return;
+
+    const range = sel.getRangeAt(0);
+    if (!editor.contains(range.commonAncestorContainer)) return;
+
+    if (range.collapsed) return;
+
+    // 選択範囲の右端（終端）に、目印用の一時マーカーを挿入しておく
+    const marker = document.createElement('span');
+    marker.id = '__clear-format-cursor-marker__';
+    marker.appendChild(document.createTextNode('\u200B')); // 幅を持たない透明な文字
+
+    const endRange = range.cloneRange();
+    endRange.collapse(false); // 選択範囲の右端（終わり）に位置を絞る
+    endRange.insertNode(marker);
+
+    // ブラウザ標準のremoveFormatを実行。
+    // 部分選択でも書式タグの分割を内部で正しく処理してくれる。
+    document.execCommand('styleWithCSS', false, false);
+    document.execCommand('removeFormat', false, null);
+
+    // 中身が空になった書式タグの残骸があれば掃除（マーカー自体は対象外）
+    editor.querySelectorAll('b, i, u, font, span, strong, em').forEach(el => {
+        if (el.id !== '__clear-format-cursor-marker__' && el.textContent === '') {
+            el.remove();
+        }
+    });
+    editor.normalize();
+
+    // マーカーの位置を探してカーソルを合わせ、マーカーを削除する
+    const foundMarker = document.getElementById('__clear-format-cursor-marker__');
+    const newRange = document.createRange();
+
+    if (foundMarker) {
+        newRange.setStartBefore(foundMarker);
+        newRange.collapse(true);
+        foundMarker.remove();
+    } else {
+        // 保険：マーカーが見つからなければエディタ末尾に置く
+        newRange.selectNodeContents(editor);
+        newRange.collapse(false);
+    }
+
+    editor.normalize();
+    sel.removeAllRanges();
+    sel.addRange(newRange);
+    savedRange = newRange.cloneRange();
+}

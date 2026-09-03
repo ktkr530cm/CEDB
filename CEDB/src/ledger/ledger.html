@@ -16,23 +16,57 @@
             <aside class="ledger-sidebar">
                 <h2>機器台帳 メニュー</h2>
                 <div>
-                    <button class="btn" onclick="openNewLedgerForm()">＋ 新規登録</button>
+                    <button type="button" class="btn" onclick="openNewLedgerForm()">＋ 新規登録</button>
                 </div>
                 <hr>
-                <div>
-                    <label>絞り込み検索</label>
-                    <input type="text" id="ledger-search-input" placeholder="CE番号・機種名等..." onkeydown="if(event.key === 'Enter') searchLedger();">
-                    <div>
-                        <button class="btn-sub" onclick="clearLedgerSearch()">クリア</button>
+                
+                <!-- 検索エリア -->
+                <div class="search-box-container">
+                    <label for="ledger-search-input" class="search-label">絞り込み検索</label>
+                    
+                    <!-- 検索キーワード入力 -->
+                    <div class="search-input-wrapper">
+                        <input type="text" id="ledger-search-input" placeholder="キーワードを入力..." onkeydown="if(event.key === 'Enter') searchLedger();">
+                    </div>
+
+                    <!-- 検索対象列の複数選択パネル -->
+                    <div class="search-target-wrapper">
+                        <div class="search-target-header">
+                            <span class="search-target-title">検索対象項目（複数選択可）</span>
+                            <div class="action-links">
+                                <button type="button" class="link-btn" onclick="selectAllSearchTargets(true)">全選択</button>
+                                <button type="button" class="link-btn" onclick="selectAllSearchTargets(false)">全解除</button>
+                            </div>
+                        </div>
+                        
+                        <!-- JavaScriptで動的生成されるチェックボックスコンテナ -->
+                        <div id="search-target-checkboxes" class="checkbox-container"></div>
+                    </div>
+
+                    <div class="search-btn-group">
+                        <button type="button" class="btn-sub" onclick="clearLedgerSearch()">クリア</button>
                     </div>
                 </div>
+
                 <hr>
-                <button class="btn-sub" onclick="resetLedgerColumnOrder()" title="列の並び順を初期状態に戻します">↺ 列順リセット</button>
+                <button type="button" class="btn-sub" onclick="resetLedgerColumnOrder()" title="列の並び順を初期状態に戻します">↺ 列順リセット</button>
+                <button type="button" class="btn-sub" onclick="toggleColumnVisibilityPanel()" title="表示する列を選択します">☑ 表示列の設定</button>
+
+                <div id="ledger-column-visibility-panel" class="column-visibility-panel" style="display:none;">
+                    <div class="column-visibility-header">
+                        <span>表示する列</span>
+                        <div class="column-visibility-actions">
+                            <button type="button" class="link-btn" onclick="setAllColumnsVisibility(true)">全選択</button>
+                            <button type="button" class="link-btn" onclick="setAllColumnsVisibility(false)">全解除</button>
+                        </div>
+                    </div>
+                    <div id="ledger-column-visibility-list" class="column-visibility-list"></div>
+                </div>
             </aside>
 
             <!-- 右側メインエリア：一覧テーブル -->
-            <main>
-                <div>
+            <main class="ledger-main">
+                <div class="table-wrapper">
                     <table class="record-table">
                         <thead>
                             <tr id="ledger-table-head-row">
@@ -55,9 +89,9 @@
                 <h2>機器台帳 メニュー</h2>
                 
                 <!-- 保存・キャンセルボタン -->
-                <div>
-                   <button type="submit" form="ledger-form" class="btn-success">💾 保存</button>
-                   <button type="button" class="btn-sub" onclick="cancelLedgerForm()">キャンセル</button>
+                <div class="form-actions-sidebar">
+                    <button type="submit" form="ledger-form" class="btn-success">💾 保存</button>
+                    <button type="button" class="btn-sub" onclick="cancelLedgerForm()">キャンセル</button>
                 </div>
 
                 <hr>
@@ -66,30 +100,29 @@
             </aside>
 
             <!-- 右側メインエリア：入力フォーム -->
-            <main>
-                <div>
+            <main class="ledger-main">
+                <div class="form-header">
                     <h2 id="form-title">機器台帳 登録・編集</h2>
                 </div>
 
                 <form id="ledger-form" class="single-record-form" onsubmit="event.preventDefault(); saveLedger();">
-                    <input type="hidden" id="ledger-id">
+                    <input type="hidden" id="ledger-id" name="ledger-id">
 
                     <h3 class="form-section-title">基本情報</h3>
                     <div class="form-grid">
-                        
                         <div class="form-group">
                             <label for="ce-number">CE番号 <span class="required">*</span></label>
-                            <input type="text" id="ce-number" placeholder="例: CE-00123" required>
+                            <input type="text" id="ce-number" name="ce-number" placeholder="例: CE-00123" required>
                         </div>
 
                         <div class="form-group">
-                          <label for="prev-dept">前部署</label>
-                          <input type="text" id="prev-dept" placeholder="例: 2階病棟">
+                            <label for="prev-dept">前部署</label>
+                            <input type="text" id="prev-dept" name="prev-dept" placeholder="例: 2階病棟">
                         </div>
 
                         <div class="form-group">
                             <label for="operating-status">稼働状況</label>
-                            <select id="operating-status">
+                            <select id="operating-status" name="operating-status">
                                 <option value="稼働">稼働</option>
                                 <option value="廃棄待ち">廃棄待ち</option>
                                 <option value="廃棄">廃棄</option>
@@ -98,7 +131,7 @@
                         
                         <div class="form-group">
                             <label for="device-category">機器分類</label>
-                            <select id="device-category">
+                            <select id="device-category" name="device-category">
                                 <option value="">選択してください</option>
                                 <option value="生体情報モニタ">生体情報モニタ</option>
                                 <option value="送信機">送信機</option>
@@ -110,13 +143,15 @@
                                 <option value="その他">その他</option>
                             </select>
                         </div>
+
                         <div class="form-group">
                             <label for="model-name">機種名 <span class="required">*</span></label>
-                            <input type="text" id="model-name" placeholder="例: ○○○○-100" required oninput="updateDeviceImagePreview()">
+                            <input type="text" id="model-name" name="model-name" placeholder="例: ○○○○-100" required oninput="updateDeviceImagePreview()">
                         </div>
+
                         <div class="form-group">
                             <label for="manufacturer">メーカー</label>
-                            <select id="manufacturer">
+                            <select id="manufacturer" name="manufacturer">
                                 <option value="">選択してください</option>
                                 <option value="日本光電">日本光電</option>
                                 <option value="フクダ電子">フクダ電子</option>
@@ -128,91 +163,90 @@
                                 <option value="その他">その他</option>
                             </select>
                         </div>
+
                         <div class="form-group">
                             <label for="dept">部署</label>
-                            <input type="text" id="dept" placeholder="例: ICU">
+                            <input type="text" id="dept" name="dept" placeholder="例: ICU">
                         </div>
+
                         <div class="form-group">
                             <label for="location">配置場所</label>
-                            <input type="text" id="location" placeholder="例: 3階病棟">
+                            <input type="text" id="location" name="location" placeholder="例: 3階病棟">
                         </div>
-                        
                     </div>
 
                     <h3 class="form-section-title">識別・コード情報</h3>
-<div class="form-grid">
-    <div class="form-group">
-        <label for="serial-number">シリアル</label>
-        <input type="text" id="serial-number" placeholder="S/N">
-    </div>
-    <div class="form-group">
-        <label for="asset-number">資産番号</label>
-        <input type="text" id="asset-number" placeholder="資産番号">
-    </div>
-    <div class="form-group">
-        <label for="ch-number">CH番号</label>
-        <input type="text" id="ch-number" placeholder="CH番号">
-    </div>
-    <div class="form-group">
-        <label for="barcode">バーコード</label>
-        <input type="text" id="barcode" placeholder="バーコード">
-    </div>
-    <div class="form-group">
-        <label for="gs1">GS1-128</label>
-        <input type="text" id="gs1" placeholder="GS1コード">
-    </div>
-    <div class="form-group">
-        <label for="years-in-use">耐用年数</label>
-        <input type="number" id="years-in-use" placeholder="例: 6">
-    </div>
-</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="serial-number">シリアル</label>
+                            <input type="text" id="serial-number" name="serial-number" placeholder="S/N">
+                        </div>
+                        <div class="form-group">
+                            <label for="asset-number">資産番号</label>
+                            <input type="text" id="asset-number" name="asset-number" placeholder="資産番号">
+                        </div>
+                        <div class="form-group">
+                            <label for="ch-number">CH番号</label>
+                            <input type="text" id="ch-number" name="ch-number" placeholder="CH番号">
+                        </div>
+                        <div class="form-group">
+                            <label for="barcode">バーコード</label>
+                            <input type="text" id="barcode" name="barcode" placeholder="バーコード">
+                        </div>
+                        <div class="form-group">
+                            <label for="gs1">GS1-128</label>
+                            <input type="text" id="gs1" name="gs1" placeholder="GS1コード">
+                        </div>
+                    </div>
 
                     <h3 class="form-section-title">登録・廃棄情報</h3>
-<div class="form-grid">
-    <div class="form-group">
-        <label for="reg-date">登録日</label>
-        <input type="date" id="reg-date">
-    </div>
-    <div class="form-group">
-        <label for="delivery-staff">納入担当者</label>
-        <input type="text" id="delivery-staff" placeholder="担当者名">
-    </div>
-    <div class="form-group">
-        <!-- ID重複を解消 -->
-        <label for="disposal-date">廃棄日</label>
-        <input type="date" id="disposal-date">
-    </div>
-    <div class="form-group">
-        <!-- ID重複を解消 -->
-        <label for="disposal-staff">廃棄担当者</label>
-        <input type="text" id="disposal-staff" placeholder="担当者名">
-    </div>
-    <div class="form-group col-span-2">
-        <!-- 全角スペース除去 -->
-        <label for="disposal-reason">廃棄理由</label>
-        <textarea id="disposal-reason" rows="2" placeholder="廃棄理由を記入してください"></textarea>
-    </div>
-</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="reg-date">登録日</label>
+                            <input type="date" id="reg-date" name="reg-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="delivery-staff">納入担当者</label>
+                            <input type="text" id="delivery-staff" name="delivery-staff" placeholder="担当者名">
+                        </div>
+                        <div class="form-group">
+                            <label for="disposal-date">廃棄日</label>
+                            <input type="date" id="disposal-date" name="disposal-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="disposal-staff">廃棄担当者</label>
+                            <input type="text" id="disposal-staff" name="disposal-staff" placeholder="担当者名">
+                        </div>
+                        <div class="form-group col-span-2">
+                            <label for="disposal-reason">廃棄理由</label>
+                            <textarea id="disposal-reason" name="disposal-reason" rows="2" placeholder="廃棄理由を記入してください"></textarea>
+                        </div>
+                    </div>
 
                     <h3 class="form-section-title">保守情報</h3>
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="maint-status">保守状況</label>
-                            <select id="maint-status">
+                            <select id="maint-status" name="maint-status">
                                 <option value="保守継続">保守継続</option>
                                 <option value="保守終了">保守終了</option>
                                 <option value="院内対応">院内対応</option>
                             </select>
                         </div>
+
                         <div class="form-group">
-    <label for="repair-company">修理業者名</label>
-    <input type="text" id="repair-company" placeholder="例: ○○メディカル">
-    <input type="tel" id="repair-tel" placeholder="連絡先">
-</div>
+                            <label for="repair-company">修理業者名</label>
+                            <input type="text" id="repair-company" name="repair-company" placeholder="例: ○○メディカル">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="repair-tel">修理業者 連絡先</label>
+                            <input type="tel" id="repair-tel" name="repair-tel" placeholder="00-0000-0000">
+                        </div>
 
                         <div class="form-group">
                             <label for="bimonthly-inspection">点検頻度</label>
-                            <select id="bimonthly-inspection">
+                            <select id="bimonthly-inspection" name="bimonthly-inspection">
                                 <option value="">選択してください</option>
                                 <option value="毎日点検">毎日点検</option>
                                 <option value="始業点検">始業点検</option>
@@ -221,69 +255,55 @@
                                 <option value="隔月点検">隔月点検</option>
                             </select>
                         </div>
- <div class="form-group">
-                            <label for="Inspection person">点検担当</label>
-                            <select id="inspection-person">
+
+                        <div class="form-group">
+                            <label for="inspection-person">点検担当</label>
+                            <select id="inspection-person" name="inspection-person">
                                 <option value="">選択してください</option>
                                 <option value="カテ担当">カテ担当</option>
                                 <option value="臨床担当">臨床担当</option>
-                                <option value="ＯＰＥ担当">ＯＰＥ担当</option>
+                                <option value="OPE担当">OPE担当</option>
                                 <option value="保守担当">保守担当</option>
                                 <option value="透析担当">透析担当</option>
-                                <option value="ＨＢＯ担当">ＨＢＯ担当</option>
+                                <option value="HBO担当">HBO担当</option>
                                 <option value="使用後担当">使用後担当</option>
-                                <option value="２ｎｄ担当">２ｎｄ担当</option>
+                                <option value="2nd担当">2nd担当</option>
                             </select>
                         </div>
 
                         <div class="form-group">
-    <label for="inspection-month">点検月</label>
-    <select id="bimonthly-inspection">
+                            <label for="inspection-month">点検月</label>
+                            <select id="inspection-month" name="inspection-month">
                                 <option value="">選択してください</option>
-                                <option value="４月">４月</option>
-                                <option value="５月">５月</option>
-                                <option value="６月">６月</option>
-                                <option value="７月">７月</option>
-                                <option value="８月">８月</option>
-                                <option value="９月">９月</option>
-                                <option value="１０月">１０月</option>
-                                <option value="１１月">１１月</option>
-                                <option value="１２月">１２月</option>
-                                <option value="１月">１月</option>
-                                <option value="２月">２月</option>
-                                <option value="３月">３月</option>
-    </select>
-    </div>
-<div class="form-group">
-    <label for="inspection-week">点検週</label>
-    <select id="inspection-week">
-                                <option value="">選択してください</option>
-                                <option value="１週目">１週目</option>
-                                <option value="２週目">２週目</option>
-                                <option value="３週目">３週目</option>
-                                <option value="４週目">４週目</option>
-    </select>
-</div>
-
-                       
-
+                                <option value="4月">4月</option>
+                                <option value="5月">5月</option>
+                                <option value="6月">6月</option>
+                                <option value="7月">7月</option>
+                                <option value="8月">8月</option>
+                                <option value="9月">9月</option>
+                                <option value="10月">10月</option>
+                                <option value="11月">11月</option>
+                                <option value="12月">12月</option>
+                                <option value="1月">1月</option>
+                                <option value="2月">2月</option>
+                                <option value="3月">3月</option>
+                            </select>
+                        </div>
                     </div>
 
                     <h3 class="form-section-title">備考</h3>
                     <div class="form-grid">
                         <div class="form-group col-span-2">
                             <label for="remarks">備考</label>
-                            <textarea id="remarks" rows="2" placeholder="特記事項があれば入力してください"></textarea>
+                            <textarea id="remarks" name="remarks" rows="2" placeholder="特記事項があれば入力してください"></textarea>
                         </div>
                     </div>
                 </form>
             </main>
         </div>
     </div>
-    
 
-<!-- JavaScriptの読み込み -->
-<script src="ledger.js"></script>
-
+    <!-- JavaScriptの読み込み -->
+    <script src="ledger.js"></script>
 </body>
 </html>

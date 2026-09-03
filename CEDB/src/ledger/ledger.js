@@ -41,6 +41,96 @@ function updateDeviceImagePreview() {
 // --- 機器台帳データ用ストレージキー ---
 const LEDGER_STORAGE_KEY = 'ledger_data_list';
 const LEDGER_COLUMN_ORDER_KEY = 'ledger_column_order';
+const LEDGER_COLUMN_VISIBILITY_KEY = 'ledger_column_visibility';
+
+// --- 列の表示状態を取得（未設定の列はデフォルトで表示） ---
+function getLedgerColumnVisibility() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(LEDGER_COLUMN_VISIBILITY_KEY) || 'null');
+        if (saved && typeof saved === 'object') {
+            return saved;
+        }
+    } catch (e) {}
+    return {};
+}
+
+// --- 列の表示状態を保存 ---
+function saveLedgerColumnVisibility(visibility) {
+    localStorage.setItem(LEDGER_COLUMN_VISIBILITY_KEY, JSON.stringify(visibility));
+}
+
+// --- 指定した列が表示対象かどうか判定（デフォルトtrue） ---
+function isColumnVisible(key) {
+    const visibility = getLedgerColumnVisibility();
+    return visibility[key] !== false;
+}
+
+// --- 列の表示/非表示を切り替え ---
+function toggleColumnVisibility(key) {
+    const visibility = getLedgerColumnVisibility();
+    visibility[key] = !isColumnVisible(key);
+    saveLedgerColumnVisibility(visibility);
+    renderLedgerTableHeader();
+    renderLedgerTable();
+    renderColumnVisibilityList();
+}
+
+// --- 全選択／全解除 ---
+function setAllColumnsVisibility(show) {
+    const visibility = {};
+    LEDGER_COLUMN_KEYS.forEach(function(key) {
+        visibility[key] = show;
+    });
+    saveLedgerColumnVisibility(visibility);
+    renderLedgerTableHeader();
+    renderLedgerTable();
+    renderColumnVisibilityList();
+}
+
+// --- パネルの表示切り替え ---
+function toggleColumnVisibilityPanel() {
+    const panel = document.getElementById('ledger-column-visibility-panel');
+    if (!panel) return;
+    const isHidden = panel.style.display === 'none';
+    if (isHidden) {
+        renderColumnVisibilityList();
+    }
+    panel.style.display = isHidden ? 'block' : 'none';
+}
+
+// --- チェックボックス一覧の描画 ---
+function renderColumnVisibilityList() {
+    const list = document.getElementById('ledger-column-visibility-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const order = getLedgerColumnOrder();
+    const colsByKey = Object.fromEntries(LEDGER_COLUMNS.map(function(c) { return [c.key, c]; }));
+
+    order.forEach(function(key) {
+        const col = colsByKey[key];
+        if (!col) return;
+
+        const item = document.createElement('div');
+        item.className = 'column-visibility-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = 'col-vis-' + key;
+        checkbox.checked = isColumnVisible(key);
+        checkbox.addEventListener('change', function() {
+            toggleColumnVisibility(key);
+        });
+
+        const label = document.createElement('label');
+        label.htmlFor = 'col-vis-' + key;
+        label.textContent = col.label;
+
+        item.appendChild(checkbox);
+        item.appendChild(label);
+        list.appendChild(item);
+    });
+}
 
 // --- 一覧列の定義 ---
 // --- 機器台帳の全項目定義（項目の追加・削除・並び替えはここだけを編集） ---
@@ -65,7 +155,6 @@ const LEDGER_COLUMNS = [
     { key: 'inspectionWeek',    label: '点検週',    formId: 'inspection-week' },
     { key: 'regDate',           label: '登録日',    formId: 'reg-date' },
     { key: 'deliveryStaff',     label: '納品担当',  formId: 'delivery-staff' },
-    { key: 'yearsInUse',        label: '耐用年数',  formId: 'years-in-use' },
     { key: 'disposalDate',      label: '廃棄日',    formId: 'disposal-date' },
     { key: 'disposalStaff',     label: '廃棄担当',  formId: 'disposal-staff' },
     { key: 'disposalReason',    label: '廃棄理由',  formId: 'disposal-reason' },
@@ -100,9 +189,11 @@ function resetLedgerColumnOrder() {
 }
 
 let ledgerDragColumnKey = null;
+let ledgerSelectedColumns = new Set();   // ★複数選択された列キーの集合
+let ledgerLastClickedColumn = null;      // ★Shift選択の起点
 
 // --- ヘッダー行描画（ドラッグ&ドロップ対応） ---
-// --- ヘッダー行描画（ドラッグ&ドロップ対応） ---
+// --- ヘッダー行描画（ドラッグ&ドロップ + 複数選択対応） ---
 function renderLedgerTableHeader() {
     const headRow = document.getElementById('ledger-table-head-row');
     if (!headRow) return;
@@ -115,53 +206,142 @@ function renderLedgerTableHeader() {
     order.forEach(key => {
         const col = colsByKey[key];
         if (!col) return;
+          if (!isColumnVisible(key)) return; 
         const th = document.createElement('th');
         th.textContent = col.label;
         th.className = 'draggable-col';
         th.draggable = true;
         th.dataset.colKey = key;
-        th.title = 'ドラッグで列の順番を変更できます';
+        th.title = 'クリックで選択（Ctrl/Cmd・Shiftで複数選択）、ドラッグで順番を変更できます';
 
-        // ★追加: 各列の最小幅をJSで直接固定（文字が潰れるのを防ぐ）
-        // 項目によって長さを変えたい場合は switch 文等で分岐可能
+        th.style.cursor = 'grab';
+
         if (key === 'modelName' || key === 'remarks') {
-            th.style.minWidth = '180px'; // 長めの項目
+            th.style.minWidth = '180px';
         } else if (key === 'ceNumber' || key === 'operatingStatus') {
-            th.style.minWidth = '100px'; // 短めの項目
+            th.style.minWidth = '100px';
         } else {
-            th.style.minWidth = '130px'; // 標準幅
+            th.style.minWidth = '130px';
         }
 
+        // ★選択中の列を視覚的に強調（CSSがなくても分かるようinline styleも付与）
+        if (ledgerSelectedColumns.has(key)) {
+            th.classList.add('col-selected');
+            th.style.backgroundColor = '#cfe3ff';
+        }
+
+        // --- クリックで選択（単一 / Ctrl・Cmdでトグル / Shiftで範囲選択） ---
+        th.addEventListener('click', (e) => {
+            const currentOrder = getLedgerColumnOrder();
+
+            if (e.shiftKey && ledgerLastClickedColumn) {
+                const fromIdx = currentOrder.indexOf(ledgerLastClickedColumn);
+                const toIdx = currentOrder.indexOf(key);
+                if (fromIdx !== -1 && toIdx !== -1) {
+                    const [start, end] = fromIdx < toIdx ? [fromIdx, toIdx] : [toIdx, fromIdx];
+                    ledgerSelectedColumns = new Set(currentOrder.slice(start, end + 1));
+                }
+            } else if (e.ctrlKey || e.metaKey) {
+                if (ledgerSelectedColumns.has(key)) {
+                    ledgerSelectedColumns.delete(key);
+                } else {
+                    ledgerSelectedColumns.add(key);
+                }
+                ledgerLastClickedColumn = key;
+            } else {
+                // 修飾キーなしのクリック：単一選択（同じ列を再クリックで選択解除）
+                if (ledgerSelectedColumns.size === 1 && ledgerSelectedColumns.has(key)) {
+                    ledgerSelectedColumns.clear();
+                } else {
+                    ledgerSelectedColumns = new Set([key]);
+                }
+                ledgerLastClickedColumn = key;
+            }
+            renderLedgerTableHeader();
+        });
+
+                // --- ドラッグ開始 ---
         th.addEventListener('dragstart', (e) => {
+            // 未選択の列をドラッグし始めたら、その列単体を選択状態にする
+            if (!ledgerSelectedColumns.has(key)) {
+                ledgerSelectedColumns = new Set([key]);
+                ledgerLastClickedColumn = key;
+                renderLedgerTableHeader();
+            }
             ledgerDragColumnKey = key;
             th.classList.add('col-dragging');
+            th.style.cursor = 'grabbing';
             e.dataTransfer.effectAllowed = 'move';
         });
         th.addEventListener('dragend', () => {
             th.classList.remove('col-dragging');
-            headRow.querySelectorAll('th').forEach(el => el.classList.remove('col-drag-over'));
+            th.style.cursor = 'grab';
+            headRow.querySelectorAll('th').forEach(el => {
+                el.classList.remove('col-drag-over');
+                el.style.borderLeft = '';
+                el.style.borderRight = '';
+            });
         });
         th.addEventListener('dragover', (e) => {
             e.preventDefault();
-            if (key !== ledgerDragColumnKey) th.classList.add('col-drag-over');
+            if (key === ledgerDragColumnKey) return;
+
+            headRow.querySelectorAll('th').forEach(el => {
+                if (el !== th) {
+                    el.style.borderLeft = '';
+                    el.style.borderRight = '';
+                }
+            });
+
+            th.classList.add('col-drag-over');
+
+            const rect = th.getBoundingClientRect();
+            const isLeftHalf = (e.clientX - rect.left) < rect.width / 2;
+
+            if (isLeftHalf) {
+                th.style.borderLeft = '4px solid #2b6cb0';
+                th.style.borderRight = '';
+                th.dataset.dropSide = 'left';
+            } else {
+                th.style.borderRight = '4px solid #2b6cb0';
+                th.style.borderLeft = '';
+                th.dataset.dropSide = 'right';
+            }
         });
         th.addEventListener('dragleave', () => {
             th.classList.remove('col-drag-over');
+            th.style.borderLeft = '';
+            th.style.borderRight = '';
         });
+
+        // --- ドロップ：選択中の全列をまとめて移動 ---
         th.addEventListener('drop', (e) => {
             e.preventDefault();
             th.classList.remove('col-drag-over');
-            if (!ledgerDragColumnKey || ledgerDragColumnKey === key) return;
+            th.style.borderLeft = '';
+            th.style.borderRight = '';
+            if (!ledgerDragColumnKey) return;
 
             const currentOrder = getLedgerColumnOrder();
-            const fromIndex = currentOrder.indexOf(ledgerDragColumnKey);
-            const toIndex = currentOrder.indexOf(key);
-            if (fromIndex === -1 || toIndex === -1) return;
 
-            currentOrder.splice(fromIndex, 1);
-            currentOrder.splice(toIndex, 0, ledgerDragColumnKey);
+            const movingKeys = ledgerSelectedColumns.has(ledgerDragColumnKey)
+                ? currentOrder.filter(k => ledgerSelectedColumns.has(k))
+                : [ledgerDragColumnKey];
 
-            saveLedgerColumnOrder(currentOrder);
+            if (movingKeys.includes(key)) {
+                ledgerDragColumnKey = null;
+                return;
+            }
+
+            const remaining = currentOrder.filter(k => !movingKeys.includes(k));
+
+            const dropSide = th.dataset.dropSide || 'left';
+            let dropIndex = remaining.indexOf(key);
+            if (dropSide === 'right') dropIndex += 1;
+
+            const newOrder = remaining.slice(0, dropIndex).concat(movingKeys, remaining.slice(dropIndex));
+
+            saveLedgerColumnOrder(newOrder);
             ledgerDragColumnKey = null;
             renderLedgerTableHeader();
             renderLedgerTable();
@@ -174,7 +354,7 @@ function renderLedgerTableHeader() {
     const opTh = document.createElement('th');
     opTh.textContent = '操作';
     opTh.className = 'col-action';
-    opTh.style.minWidth = '80px'; // ★操作列の幅も固定
+    opTh.style.minWidth = '80px';
     headRow.appendChild(opTh);
 }
 
@@ -265,7 +445,7 @@ function renderLedgerTable(filterText) {
     tbody.innerHTML = '';
 
     let data = getStoredLedgers();
-    const order = getLedgerColumnOrder();
+    const order = getLedgerColumnOrder().filter(isColumnVisible); // ★変更：表示対象のみ抽出
     const colCount = order.length + 1;
 
     if (filterText) {
@@ -372,6 +552,7 @@ function initLedger() {
     }
     // 検索入力イベントを登録
     bindLedgerSearchEvent();
+    renderColumnVisibilityList();
 }
 
 // ledger.jsが読み込まれた際にも自動実行
@@ -629,3 +810,4 @@ function resetTagInputs() {
         renderTags(key);
     });
 }
+
